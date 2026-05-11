@@ -917,40 +917,196 @@ function rRecibos(){
 // ---
 function rFiado(){
   const comF=S.clientes.filter(c=>fiadoSaldo(c.id)>0);
+  const todosComMovimento=S.clientes.filter(c=>{
+    const temOrc=S.orcamentos.some(o=>o.clienteId===c.id&&(o.pagamento==='fiado'||o.pagamento==='parcial'));
+    const temLanc=S.lancamentos.some(l=>l.clienteId===c.id);
+    const temPag=S.pagamentos.some(p=>p.clienteId===c.id);
+    return temOrc||temLanc||temPag;
+  });
   const total=comF.reduce((s,c)=>s+fiadoSaldo(c.id),0);
   const pags=[...S.pagamentos].sort((a,b)=>b.ts-a.ts).slice(0,8);
-  return`<div class="sc">
-    <div class="scard" style="${total>0?'border-color:#f0d080;background:var(--wnb)':''}"><div class="sl">Em aberto</div><div class="sv" style="font-size:17px;${total>0?'color:var(--wn)':''}">${R(total)}</div><div class="ss">${comF.length} cliente(s)</div></div>
-    <div class="scard"><div class="sl">Recebido</div><div class="sv" style="font-size:17px">${R(S.pagamentos.reduce((s,p)=>s+p.valor,0))}</div><div class="ss">historico total</div></div>
-    <div class="scard"><div class="sl">Lancamentos</div><div class="sv">${S.lancamentos.length}</div><div class="ss">registros</div></div>
-    <div class="scard"><div class="sl">Em dia</div><div class="sv">${S.clientes.filter(c=>fiadoSaldo(c.id)===0).length}</div><div class="ss">clientes</div></div>
+  return`
+  <div class="sc">
+    <div class="scard" style="${total>0?'border-color:#f0d080;background:var(--wnb)':''}">
+      <div class="sl">Em aberto</div>
+      <div class="sv" style="font-size:17px;${total>0?'color:var(--wn)':''}">${R(total)}</div>
+      <div class="ss">${comF.length} cliente(s)</div>
+    </div>
+    <div class="scard">
+      <div class="sl">Recebido</div>
+      <div class="sv" style="font-size:17px">${R(S.pagamentos.reduce((s,p)=>s+p.valor,0))}</div>
+      <div class="ss">historico total</div>
+    </div>
+    <div class="scard">
+      <div class="sl">Lancamentos</div>
+      <div class="sv">${S.lancamentos.length}</div>
+      <div class="ss">registros manuais</div>
+    </div>
+    <div class="scard">
+      <div class="sl">Em dia</div>
+      <div class="sv">${S.clientes.filter(c=>fiadoSaldo(c.id)===0).length}</div>
+      <div class="ss">clientes</div>
+    </div>
   </div>
+
+  ${comF.length?`
   <div style="font-size:13px;font-weight:600;margin-bottom:10px">Clientes com saldo em aberto</div>
-  ${comF.length?comF.sort((a,b)=>fiadoSaldo(b.id)-fiadoSaldo(a.id)).map(c=>{
-    const saldo=fiadoSaldo(c.id),lim=c.fiadoLimite||0,pct=lim>0?Math.min(100,(saldo/lim)*100):0;
-    return`<div class="fc ${pct>=90?'dg':pct>=70?'wn':''}">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
-        <div class="av" style="width:36px;height:36px;font-size:12px">${c.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}</div>
-        <div style="flex:1"><div style="font-weight:500;font-size:13px">${c.nome}</div>${c.tel?`<div style="font-size:11px;color:var(--mt)">${c.tel}</div>`:''}</div>
-        <div style="font-family:'DM Mono',monospace;font-weight:600;font-size:15px;color:${pct>=90?'var(--dg)':'var(--wn)'}">${R(saldo)}</div>
-      </div>
-      ${lim>0?`<div class="pb"><div class="pf" style="width:${pct}%;background:${pct>=90?'var(--dg)':'var(--wn)'}"></div></div><div style="font-size:10px;color:var(--mt);margin-top:3px">${R(saldo)} / ${R(lim)} (${Math.round(pct)}%)</div>`:''}
-      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn sm wn" onclick="openPagCli('${c.id}')"> Receber</button>
-        <button class="btn sm pr" onclick="openRecibo('${c.id}')"> Recibo</button>
-        <button class="btn sm" onclick="openLanc('${c.id}')">+ Lancamento</button>
-        <button class="btn sm" onclick="nav('cdet','${c.id}')">Ver detalhes</button>
-        ${c.tel?`<button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppCob('${c.id}')"> Cobrar</button>`:''}
-      </div></div>`;}).join(''):`<div class="empty" style="padding:35px 0"><p>Nenhum cliente com saldo em aberto!</p></div>`}
-  ${pags.length?`<div style="font-size:13px;font-weight:600;margin:16px 0 10px">Ultimos pagamentos</div>
-  <div class="tw"><table><thead><tr><th>Cliente</th><th>Valor</th><th>Forma</th><th>Data</th></tr></thead><tbody>
-  ${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`<tr>
-    <td>${cl?cl.nome:'-'}</td>
-    <td style="font-family:'DM Mono',monospace;color:var(--ok);font-weight:500">${R(p.valor)}</td>
-    <td>${bdg('gn',p.forma)}</td>
-    <td style="color:var(--mt)">${dt(p.ts)}</td></tr>`;}).join('')}</tbody></table>
-  <div class="mobile-cards" style="padding:10px">${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`<div class="mcard"><div class="mcard-row"><div class="mcard-body"><div class="mcard-title">${cl?cl.nome:'-'}</div><div class="mcard-sub">${p.forma}  ${dt(p.ts)}</div></div><div style="font-family:'DM Mono',monospace;font-weight:600;color:var(--ok)">${R(p.valor)}</div></div></div>`;}).join('')}</div>
+  ${comF.sort((a,b)=>fiadoSaldo(b.id)-fiadoSaldo(a.id)).map(c=>rFiadoCard(c,true)).join('')}`:''}
+
+  ${todosComMovimento.filter(c=>fiadoSaldo(c.id)===0).length?`
+  <div style="font-size:13px;font-weight:600;margin:18px 0 10px">Clientes com historico (sem saldo em aberto)</div>
+  ${todosComMovimento.filter(c=>fiadoSaldo(c.id)===0).map(c=>rFiadoCard(c,false)).join('')}`:''}
+
+  ${pags.length?`
+  <div style="font-size:13px;font-weight:600;margin:18px 0 10px">Ultimos pagamentos recebidos</div>
+  <div class="tw">
+    <table><thead><tr><th>Cliente</th><th>Valor</th><th>Forma</th><th>Data</th></tr></thead><tbody>
+    ${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`<tr>
+      <td style="cursor:pointer;color:var(--ac);font-weight:500" onclick="toggleFiadoHist('${p.clienteId}')">${cl?cl.nome:'-'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--ok);font-weight:500">${R(p.valor)}</td>
+      <td>${bdg('gn',p.forma)}</td>
+      <td style="color:var(--mt)">${dt(p.ts)}</td></tr>`;}).join('')}
+    </tbody></table>
+    <div class="mobile-cards" style="padding:10px">
+    ${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`
+      <div class="mcard" onclick="toggleFiadoHist('${p.clienteId}')">
+        <div class="mcard-row">
+          <div class="mcard-body">
+            <div class="mcard-title" style="color:var(--ac)">${cl?cl.nome:'-'}</div>
+            <div class="mcard-sub">${p.forma} &middot; ${dt(p.ts)}</div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-weight:600;color:var(--ok)">${R(p.valor)}</div>
+        </div>
+      </div>`;}).join('')}
+    </div>
   </div>`:''}`;
+}
+
+function rFiadoCard(c, temSaldo){
+  const saldo=fiadoSaldo(c.id);
+  const lim=c.fiadoLimite||0;
+  const pct=lim>0?Math.min(100,(saldo/lim)*100):0;
+  const cls=temSaldo?(pct>=90?'dg':pct>=70?'wn':''):'';
+  const ini=c.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  return`<div class="fc ${cls}" id="fcard-${c.id}">
+    <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleFiadoHist('${c.id}')">
+      <div class="av" style="width:36px;height:36px;font-size:12px">${ini}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px;color:var(--ac)">${c.nome}</div>
+        ${c.tel?`<div style="font-size:11px;color:var(--mt)">${c.tel}</div>`:''}
+      </div>
+      <div style="text-align:right">
+        ${temSaldo?`<div style="font-family:'DM Mono',monospace;font-weight:700;font-size:16px;color:${pct>=90?'var(--dg)':'var(--wn)'}">${R(saldo)}</div>
+        <div style="font-size:10px;color:var(--mt)">em aberto</div>`
+        :`<div style="font-size:11px;color:var(--ok);font-weight:500">quitado</div>`}
+      </div>
+      <div style="font-size:18px;color:var(--mt);transition:transform .2s" id="fcard-arrow-${c.id}">&#9660;</div>
+    </div>
+    ${temSaldo&&lim>0?`<div class="pb" style="margin-top:6px"><div class="pf" style="width:${pct}%;background:${pct>=90?'var(--dg)':'var(--wn)'}"></div></div>
+    <div style="font-size:10px;color:var(--mt);margin-top:2px">${R(saldo)} / ${R(lim)} (${Math.round(pct)}%)</div>`:''}
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+      ${temSaldo?`<button class="btn sm wn" onclick="openPagCli('${c.id}')">Receber</button>`:''}
+      <button class="btn sm pr" onclick="openRecibo('${c.id}')">Recibo</button>
+      <button class="btn sm" onclick="openLanc('${c.id}')">+ Lancamento</button>
+      <button class="btn sm" onclick="nav('cdet','${c.id}')">Ver perfil</button>
+      ${c.tel?`<button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppCob('${c.id}')">Cobrar</button>`:''}
+    </div>
+    <!-- Historico expansivel -->
+    <div id="fhist-${c.id}" style="display:none;margin-top:14px;border-top:1px solid var(--bdr);padding-top:12px">
+      ${rFiadoHist(c.id)}
+    </div>
+  </div>`;
+}
+
+function rFiadoHist(cid){
+  const orcs=S.orcamentos.filter(o=>o.clienteId===cid&&(o.pagamento==='fiado'||o.pagamento==='parcial')).sort((a,b)=>b.criado-a.criado);
+  const lancs=S.lancamentos.filter(l=>l.clienteId===cid).sort((a,b)=>b.ts-a.ts);
+  const pags=S.pagamentos.filter(p=>p.clienteId===cid).sort((a,b)=>b.ts-a.ts);
+
+  let html='';
+
+  // Orcamentos com fiado
+  if(orcs.length){
+    html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);margin-bottom:8px">Orcamentos (fiado/parcial)</div>`;
+    html+=orcs.map(o=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg);border-radius:var(--rs);margin-bottom:6px;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div style="font-weight:500;font-size:13px">${o.nome}</div>
+          <div style="font-size:11px;color:var(--mt)">${o.material} &middot; ${o.qty}x &middot; ${dt(o.criado)}</div>
+          <div style="margin-top:3px">${bPg(o.pagamento,o.saldoDevedor)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--ac)">Total: ${R(o.total)}</div>
+          ${o.entrada?`<div style="font-size:11px;color:var(--ok)">Entrada: ${R(o.entrada)}</div>`:''}
+          ${o.saldoDevedor>0?`<div style="font-size:12px;font-weight:600;color:var(--wn)">Deve: ${R(o.saldoDevedor)}</div>`:`<div style="font-size:11px;color:var(--ok)">Quitado</div>`}
+        </div>
+        <div style="display:flex;gap:4px">
+          ${o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')">Pagar</button>`:''}
+          <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')">PDF</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Lancamentos manuais
+  if(lancs.length){
+    html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);margin:10px 0 8px">Lancamentos manuais</div>`;
+    html+=lancs.map(l=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:${l.tipo==='debito'?'var(--dgb)':'var(--okb)'};border-radius:var(--rs);margin-bottom:6px;border:1px solid ${l.tipo==='debito'?'#f8c9c9':'#8ed4b0'}">
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:13px">${l.desc}</div>
+          <div style="font-size:11px;color:var(--mt)">${dt(l.ts)}${l.venc?` &middot; Venc: ${dt(new Date(l.venc+'T12:00:00').getTime())}`:''}</div>
+          ${l.obs?`<div style="font-size:11px;color:var(--mt)">${l.obs}</div>`:''}
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:${l.tipo==='debito'?'var(--dg)':'var(--ok)'}">
+          ${l.tipo==='debito'?'+':'-'}${R(l.valor)}
+        </div>
+        <button class="btn sm dg" onclick="confDel('lanc','${l.id}')">X</button>
+      </div>`).join('');
+  }
+
+  // Pagamentos recebidos
+  if(pags.length){
+    html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);margin:10px 0 8px">Pagamentos recebidos</div>`;
+    html+=pags.map(p=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--okb);border-radius:var(--rs);margin-bottom:6px;border:1px solid #8ed4b0">
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:13px">${p.forma}</div>
+          <div style="font-size:11px;color:var(--mt)">${dt(p.ts)}${p.obs?' &middot; '+p.obs:''}</div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:var(--ok)">
+          -${R(p.valor)}
+        </div>
+      </div>`).join('');
+  }
+
+  if(!orcs.length&&!lancs.length&&!pags.length){
+    html=`<div style="text-align:center;padding:20px;color:var(--mt);font-size:13px">Nenhum historico encontrado para este cliente.</div>`;
+  }
+
+  // Resumo final
+  const totalDeve=orcs.reduce((s,o)=>s+(o.saldoDevedor||0),0)+lancs.filter(l=>l.tipo==='debito').reduce((s,l)=>s+l.valor,0);
+  const totalPago=pags.reduce((s,p)=>s+p.valor,0)+(orcs.reduce((s,o)=>s+(o.entrada||0),0));
+  html+=`<div style="display:flex;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr);flex-wrap:wrap">
+    <div style="flex:1;background:var(--wnb);border-radius:var(--rs);padding:10px;text-align:center;border:1px solid #f0d080">
+      <div style="font-size:11px;color:var(--wn)">TOTAL EM ABERTO</div>
+      <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:16px;color:var(--wn)">${R(totalDeve)}</div>
+    </div>
+    <div style="flex:1;background:var(--okb);border-radius:var(--rs);padding:10px;text-align:center;border:1px solid #8ed4b0">
+      <div style="font-size:11px;color:var(--ok)">TOTAL JA PAGO</div>
+      <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:16px;color:var(--ok)">${R(totalPago)}</div>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function toggleFiadoHist(cid){
+  const hist=document.getElementById('fhist-'+cid);
+  const arrow=document.getElementById('fcard-arrow-'+cid);
+  if(!hist)return;
+  const isOpen=hist.style.display!=='none';
+  hist.style.display=isOpen?'none':'block';
+  if(arrow)arrow.style.transform=isOpen?'':'rotate(180deg)';
 }
 
 // ---
