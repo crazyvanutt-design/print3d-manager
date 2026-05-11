@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#2D6AFF">
-<title>Print3D Manager</title>
+<title>3D Cêntrico</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -196,7 +196,7 @@ tr:hover td{background:var(--sur2)}
 <!-- ══ DESKTOP SIDEBAR ══ -->
 <div id="sb">
   <div class="logo">
-    <div class="logo-m">Print3D</div>
+    <div class="logo-m">3D Cêntrico</div>
     <div class="logo-s">Gestão de impressões</div>
   </div>
   <div style="padding:4px 0">
@@ -323,20 +323,34 @@ tr:hover td{background:var(--sur2)}
 
 <!-- RECIBO -->
 <div class="mbg" id="m-rec">
-<div class="modal" style="max-width:600px">
+<div class="modal" style="max-width:640px">
   <div class="mh"><h2 id="mr-t">Novo recibo</h2><button class="btn sm" onclick="closeM('m-rec')" style="margin-left:auto">✕</button></div>
   <div class="mb">
+    <div class="sdiv">Partes envolvidas</div>
     <div class="g2">
-      <div class="fg"><label>Cliente *</label><select id="rc"></select></div>
-      <div class="fg"><label>Descrição do pagamento *</label><input id="rd" placeholder="Ex: Orçamento #001 - Suporte câmera"></div>
-      <div class="fg"><label>Valor recebido (R$) *</label><input id="rv" type="number" step="0.01" min="0.01" placeholder="0,00"></div>
-      <div class="fg"><label>Forma de pagamento</label>
-        <select id="rfp"><option>Pix</option><option>Dinheiro</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Transferência</option><option>Link de pagamento</option></select>
-      </div>
-      <div class="fg"><label>Data do pagamento</label><input id="rdt" type="date"></div>
+      <div class="fg"><label>Cliente (quem pagou)</label><select id="rc" onchange="onRecCli()"></select></div>
       <div class="fg"><label>Número do recibo</label><input id="rnum" placeholder="Gerado automaticamente"></div>
-      <div class="fg s2"><label>Observações / referência</label><input id="rob" placeholder="Ex: Referente ao orçamento de impressão 3D..."></div>
+      <div class="fg s2"><label>Nome da empresa / pessoa que recebe (opcional)</label><input id="r-empr" placeholder="Ex: 3D Cêntrico — João Silva"></div>
     </div>
+    <div class="sdiv">Detalhes do pagamento</div>
+    <div class="g2">
+      <div class="fg s2"><label>Descrição do serviço *</label><input id="rd" placeholder="Ex: Impressão 3D de suporte para câmera"></div>
+      <div class="fg"><label>Valor recebido (R$) *</label><input id="rv" type="number" step="0.01" min="0.01" placeholder="0,00"></div>
+      <div class="fg"><label>Data do pagamento</label><input id="rdt" type="date"></div>
+    </div>
+    <div class="sdiv">Formas de pagamento aceitas neste recibo</div>
+    <div id="rec-formas-check" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px"></div>
+    <div class="g2">
+      <div class="fg s2"><label>Forma utilizada neste pagamento *</label><select id="rfp"></select></div>
+    </div>
+    <div class="sdiv">Opções do documento</div>
+    <div class="g2">
+      <div class="fg s2"><label>Observações adicionais</label><input id="rob" placeholder="Ex: Referente ao pedido #001, serviço concluído em..."></div>
+    </div>
+    <label class="chk-row" style="margin-top:4px">
+      <input type="checkbox" id="r-usar-ass" ${''}>
+      Incluir minha assinatura virtual no recibo
+    </label>
   </div>
   <div class="mf"><button class="btn" onclick="closeM('m-rec')">Cancelar</button><button class="btn pr" onclick="saveRecibo()">Gerar recibo</button></div>
 </div>
@@ -463,7 +477,20 @@ const S={
        logoBase64:'',qrcodeBase64:'',
        maqCusto:3.50,maqPotencia:150,energia:0.90,laborRate:40,margem:40,imposto:6,falha:5,
        pdfMostrar:{material:true,peso:true,tempo:true,qty:true,labor:true,extras:true,margem:false,imposto:false,desconto:true,unitario:true},
-       pdfPagamentos:{pix:true,cartao:true,dinheiro:true,link:false,qrcode:true}},
+       pdfPagamentos:{pix:true,cartao:true,dinheiro:true,link:false,qrcode:true},
+       formasPagamento:[
+         {id:'fp1',nome:'Pix',ativo:true,detalhe:''},
+         {id:'fp2',nome:'Dinheiro',ativo:true,detalhe:''},
+         {id:'fp3',nome:'Cartão de débito',ativo:true,detalhe:''},
+         {id:'fp4',nome:'Cartão de crédito',ativo:true,detalhe:''},
+         {id:'fp5',nome:'Transferência bancária',ativo:false,detalhe:''},
+         {id:'fp6',nome:'Boleto bancário',ativo:false,detalhe:''},
+         {id:'fp7',nome:'Link de pagamento',ativo:false,detalhe:''}
+       ],
+       assinaturaBase64:'',usarAssinatura:false,
+       reciboTextoIntro:'Declaro que recebi de {cliente} a quantia de:',
+       reciboTextoRef:'Referente a: {descricao}',
+       reciboRodape:''},
   editC:null,editO:null,editMat:null,editImp:null,detailId:null,
   driveOk:false,token:null,fileId:null,clientId:null,
   _pdf:null,_pdfOrcId:null,_pdfMode:null,
@@ -551,7 +578,7 @@ async function loadDrive(){
   S.recibos=d.recibos||[];S.lancamentos=d.lancamentos||[];S.pagamentos=d.pagamentos||[];
   if(d.materiais?.length)S.materiais=d.materiais;
   if(d.impressoras)S.impressoras=d.impressoras;
-  if(d.cfg)S.cfg=Object.assign({},S.cfg,d.cfg);
+  if(d.cfg){S.cfg=Object.assign({},S.cfg,d.cfg);if(d.cfg.formasPagamento)S.cfg.formasPagamento=d.cfg.formasPagamento;}
   if(d.recNum)S._recNum=d.recNum;
   toast('✓ Dados carregados!');
 }
@@ -575,7 +602,7 @@ function loadLocal(){
     S.recibos=d.recibos||[];S.lancamentos=d.lancamentos||[];S.pagamentos=d.pagamentos||[];
     if(d.materiais?.length)S.materiais=d.materiais;
     if(d.impressoras)S.impressoras=d.impressoras;
-    if(d.cfg)S.cfg=Object.assign({},S.cfg,d.cfg);
+    if(d.cfg){S.cfg=Object.assign({},S.cfg,d.cfg);if(d.cfg.formasPagamento)S.cfg.formasPagamento=d.cfg.formasPagamento;}
     if(d.recNum)S._recNum=d.recNum;
   }catch(e){}
   const cid=localStorage.getItem('p3d_cid');if(cid)S.clientId=cid;
@@ -1011,25 +1038,54 @@ function saveOrc(){
 // ═══════════════════════════════════════════════════
 // MODAL RECIBO
 // ═══════════════════════════════════════════════════
+function onRecCli(){}
 function openRecibo(cid){
   const sel=document.getElementById('rc');
-  sel.innerHTML='<option value="">Selecione o cliente...</option>'+S.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  sel.innerHTML='<option value="">Sem cliente</option>'+S.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
   if(cid)sel.value=cid;
   document.getElementById('rd').value='';document.getElementById('rv').value='';
   document.getElementById('rob').value='';
   document.getElementById('rdt').value=new Date().toISOString().slice(0,10);
   document.getElementById('rnum').value='#'+String(S._recNum).padStart(4,'0');
-  document.getElementById('rfp').value='Pix';
+  document.getElementById('r-empr').value=S.cfg.nomeLoja||'';
+  document.getElementById('r-usar-ass').checked=S.cfg.usarAssinatura||false;
+  // populate formas
+  const fps=S.cfg.formasPagamento||[];
+  const ativas=fps.filter(f=>f.ativo);
+  // checkboxes
+  const checksEl=document.getElementById('rec-formas-check');
+  checksEl.innerHTML=fps.map(f=>`<label class="chk-row" style="background:var(--sur2);border-radius:var(--rs);padding:5px 10px;margin:2px">
+    <input type="checkbox" data-fpid="${f.id}" ${f.ativo?'checked':''} onchange="updateRecFormas()"> ${f.nome}
+  </label>`).join('');
+  // select forma utilizada
+  const rfpEl=document.getElementById('rfp');
+  rfpEl.innerHTML=ativas.map(f=>`<option value="${f.nome}">${f.nome}${f.detalhe?' ('+f.detalhe+')':''}</option>`).join('');
   openM('m-rec');
+}
+function updateRecFormas(){
+  const fps=S.cfg.formasPagamento||[];
+  const checks=document.querySelectorAll('#rec-formas-check input[data-fpid]');
+  const selecionadas=[];
+  checks.forEach(ch=>{if(ch.checked){const f=fps.find(x=>x.id===ch.dataset.fpid);if(f)selecionadas.push(f)}});
+  const rfpEl=document.getElementById('rfp');
+  rfpEl.innerHTML=selecionadas.map(f=>`<option value="${f.nome}">${f.nome}${f.detalhe?' ('+f.detalhe+')':''}</option>`).join('');
 }
 function saveRecibo(){
   const cid=document.getElementById('rc').value;
   const desc=vv('rd');const val=parseFloat(document.getElementById('rv').value);
-  if(!desc)return toast('⚠ Informe a descrição');
+  if(!desc)return toast('⚠ Informe a descrição do serviço');
   if(!val||val<=0)return toast('⚠ Informe um valor válido');
   const numStr=vv('rnum')||('#'+String(S._recNum).padStart(4,'0'));
-  const rec={id:uid(),clienteId:cid,descricao:desc,valor:val,
+  // collect selected formas
+  const checks=document.querySelectorAll('#rec-formas-check input[data-fpid]:checked');
+  const formasSelecionadas=[];
+  checks.forEach(ch=>{const f=(S.cfg.formasPagamento||[]).find(x=>x.id===ch.dataset.fpid);if(f)formasSelecionadas.push(f)});
+  const rec={id:uid(),clienteId:cid,
+    emitente:vv('r-empr')||S.cfg.nomeLoja||'',
+    descricao:desc,valor:val,
     forma:document.getElementById('rfp').value,
+    formasAceitas:formasSelecionadas,
+    usarAssinatura:document.getElementById('r-usar-ass').checked,
     numero:numStr.replace('#',''),obs:vv('rob'),
     ts:new Date(document.getElementById('rdt').value+'T12:00:00').getTime()||Date.now()};
   S.recibos.push(rec);S._recNum++;
@@ -1108,7 +1164,7 @@ function pdfHeader(doc,W,pad){
   if(cfg.logoBase64){try{doc.addImage(cfg.logoBase64,'PNG',pad,7,26,26)}catch(e){}}
   const lx=cfg.logoBase64?pad+30:pad;
   doc.setFontSize(17);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-  doc.text(cfg.nomeLoja||'Print3D Manager',lx,17);
+  doc.text(cfg.nomeLoja||'3D Cêntrico',lx,17);
   const info=[];
   if(cfg.whatsapp)info.push('📱 '+cfg.whatsapp);if(cfg.email)info.push('✉ '+cfg.email);if(cfg.site)info.push('🌐 '+cfg.site);
   if(info.length){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);doc.text(info.join('   '),lx,24)}
@@ -1228,57 +1284,79 @@ function gerarPDFRec(recId){
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,H=297,pad=16;
   let y=pdfHeader(doc,W,pad);
-  // label recibo
+  const emitente=rec.emitente||cfg.nomeLoja||'3D Cêntrico';
+  // label
   doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
   doc.text('RECIBO DE PAGAMENTO',W-pad,14,{align:'right'});
   doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);
   doc.text('Nº '+rec.numero,W-pad,21,{align:'right'});
   doc.text(dt(rec.ts),W-pad,27,{align:'right'});
-  // box principal
   y+=6;
-  // declaração
-  doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,12,'F');
+  // emitente x cliente
+  doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,10,'F');
+  doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);
+  doc.text('EMITENTE',pad+3,y+4);doc.text('CLIENTE / PAGADOR',W/2+2,y+4);
+  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(15,23,42);
+  doc.text(emitente,pad+3,y+9);doc.text(cl?cl.nome:'_______________',W/2+2,y+9);
+  y+=14;
+  // intro texto
+  const introTxt=(cfg.reciboTextoIntro||'Declaro que recebi de {cliente} a quantia de:')
+    .replace('{cliente}',cl?cl.nome:'_______________').replace('{emitente}',emitente);
+  doc.setFillColor(248,249,250);doc.rect(pad,y,W-pad*2,10,'F');
   doc.setFontSize(9);doc.setFont('helvetica','italic');doc.setTextColor(50,65,90);
-  const loja=cfg.nomeLoja||'Print3D Manager';
-  doc.text(`Declaro que recebi de ${cl?cl.nome:'_______________'} a quantia de:`,pad+4,y+8);
-  y+=16;
-  // valor em destaque
+  doc.text(introTxt,pad+4,y+7);y+=14;
+  // valor destaque
   doc.setFillColor(30,58,138);doc.rect(pad,y,W-pad*2,18,'F');
-  doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-  doc.text(R(rec.valor),W/2,y+12,{align:'center'});
-  y+=24;
+  doc.setFontSize(22);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text(R(rec.valor),W/2,y+13,{align:'center'});y+=22;
+  // ref texto
+  const refTxt=(cfg.reciboTextoRef||'Referente a: {descricao}')
+    .replace('{descricao}',rec.descricao).replace('{cliente}',cl?cl.nome:'—').replace('{emitente}',emitente);
+  doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,11,'F');
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);
+  const rL=doc.splitTextToSize(refTxt,W-pad*2-8);doc.text(rL,pad+4,y+7);y+=14+Math.max(0,(rL.length-1)*5);
   // detalhes
   const linhas=[
-    ['Referente a',rec.descricao],
-    ['Forma de pagamento',rec.forma],
+    ['Forma de pagamento utilizada',rec.forma],
     ['Data do pagamento',dt(rec.ts)],
-    ...(cl?[['Nome do cliente',cl.nome]]:[] ),
-    ...(cl?.doc?[['CPF / CNPJ',cl.doc]]:[] ),
-    ...(cl?.tel?[['Telefone / WhatsApp',cl.tel]]:[] ),
-    ...(rec.obs?[['Observações',rec.obs]]:[] ),
+    ...(cl?.doc?[['CPF / CNPJ',cl.doc]]:[]),
+    ...(cl?.tel?[['Telefone / WhatsApp',cl.tel]]:[]),
+    ...(cfg.pix?[['Chave Pix',cfg.pix]]:[]),
+    ...(rec.obs?[['Observações',rec.obs]]:[]),
   ];
   linhas.forEach((l,i)=>{
-    if(i%2===0){doc.setFillColor(248,249,250);doc.rect(pad,y,W-pad*2,10,'F')}
-    doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);
-    doc.text(l[0].toUpperCase(),pad+3,y+4);
+    if(i%2===0){doc.setFillColor(250,251,252);doc.rect(pad,y,W-pad*2,10,'F')}
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text(l[0].toUpperCase(),pad+3,y+4);
     doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(15,23,42);
-    const txt=doc.splitTextToSize(String(l[1]),W-pad*2-60);
-    doc.text(txt,pad+55,y+4);y+=10;
+    const txt=doc.splitTextToSize(String(l[1]),W-pad*2-55);doc.text(txt,pad+55,y+4);y+=10;
   });
+  y+=6;
+  // formas aceitas
+  const fps=rec.formasAceitas&&rec.formasAceitas.length?rec.formasAceitas:(cfg.formasPagamento||[]).filter(f=>f.ativo);
+  if(fps.length){
+    doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text('FORMAS DE PAGAMENTO ACEITAS',pad,y);y+=5;
+    const fT=fps.map(f=>f.nome+(f.detalhe?' ('+f.detalhe+')':'')).join('   •   ');
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);
+    const fL=doc.splitTextToSize(fT,W-pad*2);doc.text(fL,pad,y);y+=fL.length*5+4;
+  }
+  // QR Code
+  if(cfg.qrcodeBase64&&cfg.pdfPagamentos?.qrcode!==false){
+    try{doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text('QR CODE PIX',W-pad-32,y-10);doc.addImage(cfg.qrcodeBase64,'PNG',W-pad-32,y-8,30,30);}catch(e){}
+  }
+  if(cfg.linkPagamento){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(30,58,138);doc.text('🔗 '+cfg.linkPagamento,pad,y);y+=6}
   y+=10;
   // assinatura
   doc.setDrawColor(180,190,200);
-  doc.line(pad,y,pad+70,y);doc.line(W-pad-70,y,W-pad,y);
+  if(rec.usarAssinatura&&cfg.assinaturaBase64){
+    try{doc.addImage(cfg.assinaturaBase64,'PNG',pad,y-10,55,20)}catch(e){}
+  }
+  doc.line(pad,y+10,pad+65,y+10);
   doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(140,150,160);
-  doc.text(loja,pad+35,y+5,{align:'center'});
-  doc.text(cl?cl.nome:'Cliente',W-pad-35,y+5,{align:'center'});
-  doc.text('Emitente',pad+35,y+9,{align:'center'});
-  doc.text('Recebedor',W-pad-35,y+9,{align:'center'});
-  y+=20;
-  // info pagamento
-  if(cfg.pix){y+=2;doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text('Pix: '+cfg.pix,pad,y);y+=6}
-  if(cfg.linkPagamento){doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text('Link: '+cfg.linkPagamento,pad,y);y+=6}
-  if(cfg.qrcodeBase64){try{doc.addImage(cfg.qrcodeBase64,'PNG',W-pad-28,y-16,26,26)}catch(e){}}
+  doc.text(emitente,pad+32,y+15,{align:'center'});doc.text('Assinatura do emitente',pad+32,y+19,{align:'center'});
+  doc.line(W-pad-65,y+10,W-pad,y+10);
+  doc.text(cl?cl.nome:'Cliente',W-pad-32,y+15,{align:'center'});doc.text('Assinatura do recebedor',W-pad-32,y+19,{align:'center'});
+  y+=28;
+  if(cfg.reciboRodape){doc.setFontSize(8.5);doc.setFont('helvetica','italic');doc.setTextColor(100,116,139);doc.text(cfg.reciboRodape,W/2,y,{align:'center'})}
   pdfFooter(doc,W,H);
   S._pdf=doc;S._pdfOrcId=recId;S._pdfMode='rec';
   const blob=doc.output('blob');
@@ -1321,7 +1399,7 @@ function wppRecibo(id){
 function wppAniv(cid){
   const c=S.clientes.find(x=>x.id===cid);if(!c)return;
   const tel=c.tel?.replace(/\D/g,'');
-  const msg=encodeURIComponent(`Olá, ${c.nome.split(' ')[0]}! 🎉🎂\n\nPassando para desejar um feliz aniversário! Que seja um dia incrível! 🥳\n\n${S.cfg.nomeLoja||'Print3D Manager'}`);
+  const msg=encodeURIComponent(`Olá, ${c.nome.split(' ')[0]}! 🎉🎂\n\nPassando para desejar um feliz aniversário! Que seja um dia incrível! 🥳\n\n${S.cfg.nomeLoja||'3D Cêntrico'}`);
   window.open(`https://wa.me/55${tel}?text=${msg}`,'_blank');
 }
 function wppCob(cid){
@@ -1490,6 +1568,46 @@ function rCfg(){
     <button class="btn pr" onclick="saveCfgP()">Salvar pagamentos e PDF</button>
   </div></div></div>
 
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Configurações do Recibo</h3><p>Personalize textos, formas de pagamento e assinatura</p></div></div>
+  <div class="cb">
+    <div class="sdiv">Textos do recibo</div>
+    <div class="g2">
+      <div class="fg s2"><label>Texto introdutório <span style="color:var(--mt);font-size:11px">(use {cliente} e {emitente})</span></label>
+        <input id="cfg-rint" value="${(S.cfg.reciboTextoIntro||'').replace(/"/g,'&quot;')}" placeholder="Declaro que recebi de {cliente} a quantia de:"></div>
+      <div class="fg s2"><label>Texto de referência <span style="color:var(--mt);font-size:11px">(use {descricao}, {cliente})</span></label>
+        <input id="cfg-rref" value="${(S.cfg.reciboTextoRef||'').replace(/"/g,'&quot;')}" placeholder="Referente a: {descricao}"></div>
+      <div class="fg s2"><label>Texto do rodapé do recibo (opcional)</label>
+        <input id="cfg-rrod" value="${(S.cfg.reciboRodape||'').replace(/"/g,'&quot;')}" placeholder="Ex: Este recibo tem validade legal conforme art. 320 do Código Civil."></div>
+    </div>
+    <div class="sdiv">Formas de pagamento disponíveis</div>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Gerencie as formas que aparecem nas opções ao criar um recibo. Você pode adicionar novas, editar detalhes (ex: número de conta) e ativar/desativar.</p>
+    <div id="fps-list">${(S.cfg.formasPagamento||[]).map(f=>`<div class="lr" id="fpl-${f.id}" style="flex-wrap:wrap;gap:6px">
+      <label class="chk-row" style="flex:0 0 auto"><input type="checkbox" ${f.ativo?'checked':''} onchange="toggleFP('${f.id}',this.checked)"> <strong>${f.nome}</strong></label>
+      <input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe (ex: chave pix, nº conta...)" value="${f.detalhe||''}" oninput="updateFPDetalhe('${f.id}',this.value)">
+      <button class="btn sm dg" onclick="delFP('${f.id}')">✕</button>
+    </div>`).join('')}</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <input id="nova-fp" style="flex:1;min-width:180px;padding:7px 11px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-family:inherit" placeholder="Nova forma (ex: Boleto bancário)">
+      <button class="btn pr" onclick="addFP()">+ Adicionar</button>
+    </div>
+    <div class="sdiv">Assinatura virtual</div>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Faça sua assinatura em papel, fotografe ou escaneie, e faça upload aqui. Ela aparecerá no recibo quando selecionada.</p>
+    <div class="fg">
+      <label>Upload da assinatura (PNG/JPG transparente — ideal)</label>
+      <input type="file" id="cfg-ass-img" accept="image/*" onchange="loadImg(this,'assinatura')" style="padding:5px;font-size:12px">
+      ${S.cfg.assinaturaBase64?`<div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+        <img src="${S.cfg.assinaturaBase64}" style="height:50px;border-radius:4px;border:1px solid var(--bdr);background:#f8f9fa;padding:4px">
+        <button class="btn sm dg" onclick="S.cfg.assinaturaBase64='';saveDrive();nav('cfg')">Remover assinatura</button>
+      </div>`:'<div style="font-size:12px;color:var(--mt);margin-top:6px">Nenhuma assinatura cadastrada ainda.</div>'}
+    </div>
+    <label class="chk-row" style="margin-top:10px">
+      <input type="checkbox" ${S.cfg.usarAssinatura?'checked':''} onchange="S.cfg.usarAssinatura=this.checked;saveDrive()"> Usar assinatura por padrão em novos recibos
+    </label>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
+      <button class="btn pr" onclick="saveCfgRec()">Salvar configurações do recibo</button>
+    </div>
+  </div></div>
+
   <div class="cs"><div class="ch"><div class="ch-t"><h3>Google Drive</h3><p>Sincronização automática</p></div></div>
   <div class="cb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div class="dr-dot ${S.driveOk?'ok':''}" style="width:10px;height:10px;flex-shrink:0"></div>
@@ -1517,9 +1635,38 @@ function saveCfgP(){
   S.cfg.pix=vv('cfg-pix');S.cfg.linkPagamento=vv('cfg-link');
   saveDrive();toast('✓ Dados de pagamento salvos!');
 }
+function saveCfgRec(){
+  S.cfg.reciboTextoIntro=vv('cfg-rint')||'Declaro que recebi de {cliente} a quantia de:';
+  S.cfg.reciboTextoRef=vv('cfg-rref')||'Referente a: {descricao}';
+  S.cfg.reciboRodape=vv('cfg-rrod');
+  saveDrive();toast('✓ Configurações do recibo salvas!');
+}
+function addFP(){
+  const nome=document.getElementById('nova-fp')?.value.trim();
+  if(!nome)return toast('⚠ Digite o nome da forma de pagamento');
+  if(!S.cfg.formasPagamento)S.cfg.formasPagamento=[];
+  S.cfg.formasPagamento.push({id:'fp'+Date.now(),nome,ativo:true,detalhe:''});
+  saveDrive();toast('✓ Forma adicionada!');nav('cfg');
+}
+function delFP(id){
+  S.cfg.formasPagamento=S.cfg.formasPagamento.filter(f=>f.id!==id);
+  saveDrive();toast('✓ Removida');nav('cfg');
+}
+function toggleFP(id,val){
+  const f=S.cfg.formasPagamento?.find(x=>x.id===id);if(f)f.ativo=val;saveDrive();
+}
+function updateFPDetalhe(id,val){
+  const f=S.cfg.formasPagamento?.find(x=>x.id===id);if(f)f.detalhe=val;
+}
 function loadImg(input,key){
   const file=input.files[0];if(!file)return;
-  if(file.size>600000)return toast('⚠ Imagem muito grande. Use menos de 600KB.');
+  if(file.size>5000000)return toast('⚠ Imagem muito grande. Use menos de 5MB.');
+  const r=new FileReader();r.onload=e=>{
+    if(key==='logo')S.cfg.logoBase64=e.target.result;
+    else if(key==='qrcode')S.cfg.qrcodeBase64=e.target.result;
+    else if(key==='assinatura')S.cfg.assinaturaBase64=e.target.result;
+    saveDrive();nav('cfg');toast('✓ Imagem carregada!');};r.readAsDataURL(file);
+}
   const r=new FileReader();r.onload=e=>{
     if(key==='logo')S.cfg.logoBase64=e.target.result;else S.cfg.qrcodeBase64=e.target.result;
     saveDrive();nav('cfg');toast('✓ Imagem carregada!');};r.readAsDataURL(file);
