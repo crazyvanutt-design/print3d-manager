@@ -253,32 +253,32 @@ tr:hover td{background:var(--sur2)}
 <div class="modal" style="max-width:660px">
   <div class="mh"><h2 id="mc-t">Novo cliente</h2><button class="btn sm" onclick="closeM('m-cli')" style="margin-left:auto">✕</button></div>
   <div class="mb">
-    <div class="sdiv">Dados pessoais</div>
+    <div class="sdiv">👤 Dados pessoais</div>
     <div class="g2">
-      <div class="fg"><label>Nome *</label><input id="cn" placeholder="Nome completo"></div>
-      <div class="fg"><label>Data de nascimento</label><input id="cnas" type="date"></div>
-      <div class="fg"><label>Empresa</label><input id="ce" placeholder="Nome da empresa"></div>
-      <div class="fg"><label>CPF / CNPJ</label><input id="cd" placeholder="000.000.000-00"></div>
+      <div class="fg"><label>👤 Nome *</label><input id="cn" placeholder="Nome completo"></div>
+      <div class="fg"><label>🎂 Data de nascimento</label><input id="cnas" type="date"></div>
+      <div class="fg"><label>🏪 Empresa / Razão social</label><input id="ce" placeholder="Nome da empresa"></div>
+      <div class="fg"><label>📄 CPF / CNPJ</label><input id="cd" placeholder="000.000.000-00"></div>
     </div>
-    <div class="sdiv">Contato</div>
+    <div class="sdiv">📞 Contato</div>
     <div class="g2">
-      <div class="fg"><label>WhatsApp *</label><input id="ct" placeholder="(83) 99999-9999"></div>
-      <div class="fg"><label>E-mail</label><input id="cem" type="email" placeholder="email@exemplo.com"></div>
-      <div class="fg"><label>Cidade / Estado</label><input id="cc" placeholder="Campina Grande / PB"></div>
-      <div class="fg"><label>Endereço</label><input id="cend" placeholder="Rua, número, bairro"></div>
+      <div class="fg"><label>📱 WhatsApp (com DDD) *</label><input id="ct" placeholder="(83) 99999-9999"></div>
+      <div class="fg"><label>✉ E-mail</label><input id="cem" type="email" placeholder="email@exemplo.com"></div>
+      <div class="fg"><label>📍 Cidade / Estado</label><input id="cc" placeholder="Campina Grande / PB"></div>
+      <div class="fg"><label>🏠 Endereço</label><input id="cend" placeholder="Rua, número, bairro"></div>
     </div>
-    <div class="sdiv">Redes sociais</div>
+    <div class="sdiv">🔗 Redes sociais</div>
     <div class="g2">
-      <div class="fg"><label>Instagram</label><input id="cig" placeholder="@usuario"></div>
-      <div class="fg"><label>Facebook</label><input id="cfb" placeholder="facebook.com/usuario"></div>
-      <div class="fg"><label>TikTok</label><input id="ctt" placeholder="@usuario"></div>
-      <div class="fg"><label>Site</label><input id="csi" placeholder="https://seusite.com.br"></div>
+      <div class="fg"><label>📷 Instagram</label><input id="cig" placeholder="@usuario"></div>
+      <div class="fg"><label>📘 Facebook</label><input id="cfb" placeholder="facebook.com/usuario"></div>
+      <div class="fg"><label>🎵 TikTok</label><input id="ctt" placeholder="@usuario"></div>
+      <div class="fg"><label>🌐 Site / Link</label><input id="csi" placeholder="https://seusite.com.br"></div>
     </div>
-    <div class="sdiv">Financeiro</div>
+    <div class="sdiv">💰 Financeiro</div>
     <div class="g2">
-      <div class="fg"><label>Desconto fixo (%)</label><input id="cdc" type="number" value="0" min="0" max="80" step="5"></div>
-      <div class="fg"><label>Limite de fiado (R$)</label><input id="cfl" type="number" value="0" min="0" step="50"></div>
-      <div class="fg s2"><label>Observações</label><textarea id="co" placeholder="Preferências, informações importantes..."></textarea></div>
+      <div class="fg"><label>🏷 Desconto fixo (%)</label><input id="cdc" type="number" value="0" min="0" max="80" step="5"></div>
+      <div class="fg"><label>💳 Limite de fiado (R$)</label><input id="cfl" type="number" value="0" min="0" step="50"></div>
+      <div class="fg s2"><label>📝 Observações</label><textarea id="co" placeholder="Preferências, informações importantes..."></textarea></div>
     </div>
   </div>
   <div class="mf"><button class="btn" onclick="closeM('m-cli')">Cancelar</button><button class="btn pr" onclick="saveCliente()">Salvar cliente</button></div>
@@ -539,15 +539,37 @@ document.querySelectorAll('.mbg').forEach(bg=>bg.addEventListener('click',e=>{if
 // ---
 function initDrive(){
   if(!window.google){setTimeout(initDrive,600);return}
-  try{S.tc=google.accounts.oauth2.initTokenClient({
-    client_id:S.clientId||'',scope:'https://www.googleapis.com/auth/drive.file',
-    callback:async r=>{
-      if(r.error){toast('Erro Drive: '+r.error);return}
-      S.token=r.access_token;S.driveOk=true;setDriveUI(true);
-      localStorage.setItem('p3d_cid',S.clientId);
-      await loadDrive();renderPage();toast('✓ Google Drive conectado!');
+  if(!S.clientId){return} // sem clientId nao tenta conectar
+  try{
+    S.tc=google.accounts.oauth2.initTokenClient({
+      client_id:S.clientId,
+      scope:'https://www.googleapis.com/auth/drive.file',
+      callback:async r=>{
+        if(r.error){
+          // se falhou silencioso, apenas mostra botao de conectar
+          if(r.error==='access_denied'||r.error==='interaction_required'){setDriveUI(false);return}
+          toast('Erro Drive: '+r.error);return;
+        }
+        S.token=r.access_token;S.driveOk=true;
+        // salva timestamp do token (dura ~1h)
+        localStorage.setItem('p3d_token_ts',Date.now().toString());
+        localStorage.setItem('p3d_cid',S.clientId);
+        setDriveUI(true);
+        await loadDrive();renderPage();
+        if(!S._autoConnect)toast('✓ Google Drive conectado!');
+        S._autoConnect=false;
+      }
+    });
+    // tenta reconexao silenciosa automaticamente se ja conectou antes
+    const lastTs=parseInt(localStorage.getItem('p3d_token_ts')||'0');
+    const elapsed=Date.now()-lastTs;
+    const ONE_HOUR=3600000;
+    if(lastTs>0 && elapsed<ONE_HOUR*12){
+      // token ainda pode ser valido ou renovavel silenciosamente
+      S._autoConnect=true;
+      S.tc.requestAccessToken({prompt:''});// sem prompt = silencioso
     }
-  })}catch(e){}
+  }catch(e){console.warn('Drive init error:',e)}
 }
 function setDriveUI(ok){
   ['ddot','ddot2'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='dr-dot'+(ok?' ok':'')});
@@ -558,11 +580,15 @@ function setDriveUI(ok){
 }
 function connectDrive(){
   if(!S.clientId){
-    const cid=prompt('Cole seu Google OAuth Client ID:\n(console.cloud.google.com → APIs → Credenciais → OAuth 2.0)');
-    if(!cid||!cid.includes('.apps.'))return toast('Client ID inválido');
-    S.clientId=cid;initDrive();setTimeout(()=>S.tc?.requestAccessToken({prompt:'consent'}),800);return;
+    const cid=prompt('Cole seu Google OAuth Client ID:\n(console.cloud.google.com > APIs > Credenciais > OAuth 2.0)');
+    if(!cid||!cid.includes('.apps.'))return toast('Client ID invalido');
+    S.clientId=cid;
+    localStorage.setItem('p3d_cid',cid);
+    initDrive();
+    setTimeout(()=>S.tc?.requestAccessToken({prompt:'consent'}),800);
+    return;
   }
-  S.tc?.requestAccessToken();
+  S.tc?.requestAccessToken({prompt:'consent'});
 }
 async function driveReq(method,ep,body){
   const r=await fetch('https://www.googleapis.com/'+ep,{method,headers:{'Authorization':'Bearer '+S.token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
@@ -1189,7 +1215,7 @@ function pdfHeader(doc,W,pad){
   const info=[];
   if(cfg.whatsapp)info.push('📱 '+cfg.whatsapp);if(cfg.email)info.push('✉ '+cfg.email);if(cfg.site)info.push('🌐 '+cfg.site);
   if(info.length){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);doc.text(info.join('   '),lx,24)}
-  const redes=[];if(cfg.instagram)redes.push('📷 '+cfg.instagram);if(cfg.facebook)redes.push('📘 '+cfg.facebook);
+  const redes=[];if(cfg.instagram)redes.push('📷 '+cfg.instagram);if(cfg.facebook)redes.push('📘 '+cfg.facebook);if(cfg.tiktok)redes.push('🎵 '+cfg.tiktok);if(cfg.youtube)redes.push('▶ '+cfg.youtube);
   if(redes.length){doc.setFontSize(7);doc.setTextColor(160,195,255);doc.text(redes.join('   '),lx,30)}
   if(cfg.localizacao){doc.setFontSize(7);doc.setTextColor(160,195,255);doc.text('📍 '+cfg.localizacao,lx,36)}
   return 48;
@@ -1200,7 +1226,7 @@ function pdfFooter(doc,W,H){
   doc.setFillColor(241,245,249);doc.rect(0,H-16,W,16,'F');
   doc.setFontSize(8);doc.setFont('helvetica','italic');doc.setTextColor(100,116,139);
   doc.text(cfg.assinatura||'Obrigado pela preferência!',W/2,H-9,{align:'center'});
-  const fl=[];if(cfg.site)fl.push('🌐 '+cfg.site);if(cfg.instagram)fl.push('📷 '+cfg.instagram);if(cfg.localizacao)fl.push('📍 '+cfg.localizacao);
+  const fl=[];if(cfg.site)fl.push('🌐 '+cfg.site);if(cfg.instagram)fl.push('📷 '+cfg.instagram);if(cfg.tiktok)fl.push('🎵 '+cfg.tiktok);if(cfg.localizacao)fl.push('📍 '+cfg.localizacao);
   if(fl.length){doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(fl.join('   '),W/2,H-4,{align:'center'})}
 }
 
@@ -1545,16 +1571,18 @@ function rCfg(){
     <button class="btn pr" onclick="saveCfgG()">Salvar padrões</button>
   </div></div></div>
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Dados do negócio</h3><p>Aparecem no PDF e WhatsApp</p></div></div>
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Dados do negócio</h3><p>Aparecem no PDF e mensagens do WhatsApp</p></div></div>
   <div class="cb"><div class="g2">
-    <div class="fg"><label>Nome do negócio</label><input id="cfg-loja" value="${S.cfg.nomeLoja||''}"></div>
-    <div class="fg"><label>WhatsApp</label><input id="cfg-wpp" value="${S.cfg.whatsapp||''}"></div>
-    <div class="fg"><label>E-mail</label><input id="cfg-email" value="${S.cfg.email||''}"></div>
-    <div class="fg"><label>Site</label><input id="cfg-site" value="${S.cfg.site||''}"></div>
-    <div class="fg"><label>Instagram</label><input id="cfg-ig" value="${S.cfg.instagram||''}"></div>
-    <div class="fg"><label>Facebook</label><input id="cfg-fb" value="${S.cfg.facebook||''}"></div>
-    <div class="fg s2"><label>Localização / Endereço</label><input id="cfg-loc" value="${S.cfg.localizacao||''}"></div>
-    <div class="fg s2"><label>Assinatura dos documentos</label><input id="cfg-ass" value="${S.cfg.assinatura||''}"></div>
+    <div class="fg"><label>🏪 Nome do negócio / marca</label><input id="cfg-loja" value="${S.cfg.nomeLoja||''}" placeholder="Ex: 3D Centrico"></div>
+    <div class="fg"><label>📱 WhatsApp (com DDD)</label><input id="cfg-wpp" value="${S.cfg.whatsapp||''}" placeholder="Ex: (83) 99999-9999"></div>
+    <div class="fg"><label>✉ E-mail de contato</label><input id="cfg-email" value="${S.cfg.email||''}" placeholder="Ex: contato@3dcentrico.com.br"></div>
+    <div class="fg"><label>🌐 Site / Link do negócio</label><input id="cfg-site" value="${S.cfg.site||''}" placeholder="Ex: www.3dcentrico.com.br"></div>
+    <div class="fg"><label>📷 Instagram</label><input id="cfg-ig" value="${S.cfg.instagram||''}" placeholder="Ex: @3dcentrico"></div>
+    <div class="fg"><label>📘 Facebook</label><input id="cfg-fb" value="${S.cfg.facebook||''}" placeholder="Ex: facebook.com/3dcentrico"></div>
+    <div class="fg"><label>🎵 TikTok</label><input id="cfg-tiktok" value="${S.cfg.tiktok||''}" placeholder="Ex: @3dcentrico"></div>
+    <div class="fg"><label>▶ YouTube</label><input id="cfg-yt" value="${S.cfg.youtube||''}" placeholder="Ex: youtube.com/@3dcentrico"></div>
+    <div class="fg s2"><label>📍 Localização / Endereço</label><input id="cfg-loc" value="${S.cfg.localizacao||''}" placeholder="Ex: Rua das Impressoes, 3D - Campina Grande / PB"></div>
+    <div class="fg s2"><label>💬 Assinatura dos documentos</label><input id="cfg-ass" value="${S.cfg.assinatura||''}" placeholder="Ex: Qualquer duvida, estou a disposicao!"></div>
   </div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
     <button class="btn pr" onclick="saveCfgN()">Salvar dados</button>
   </div></div></div>
@@ -1643,6 +1671,7 @@ function saveCfgG(){
 function saveCfgN(){
   S.cfg.nomeLoja=vv('cfg-loja');S.cfg.whatsapp=vv('cfg-wpp');S.cfg.email=vv('cfg-email');
   S.cfg.site=vv('cfg-site');S.cfg.instagram=vv('cfg-ig');S.cfg.facebook=vv('cfg-fb');
+  S.cfg.tiktok=vv('cfg-tiktok');S.cfg.youtube=vv('cfg-yt');
   S.cfg.localizacao=vv('cfg-loc');S.cfg.assinatura=vv('cfg-ass');
   saveDrive();toast('✓ Dados salvos!');
 }
@@ -1737,6 +1766,14 @@ function confDel(tipo,id){
 }
 
 loadLocal();initDrive();renderPage();
+
+// Renova o token automaticamente a cada 10 minutos (token dura 1h)
+setInterval(()=>{
+  if(S.driveOk&&S.tc&&S.clientId){
+    S._autoConnect=true;
+    S.tc.requestAccessToken({prompt:''});
+  }
+},50*60*1000);
 
 // Responsive drive icon
 window.addEventListener('resize',()=>{
