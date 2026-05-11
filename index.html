@@ -1148,22 +1148,30 @@ function gerarPDF(tipo,id){
   else if(tipo==='rec')gerarPDFRec(id);
 }
 
-// Converte caracteres especiais para ASCII compativel com jsPDF helvetica
+// Sanitiza texto para PDF (jsPDF nao suporta acentos nas fontes padrao)
 function p(str){
-  if(!str)return'';
-  if(Array.isArray(str))return str.map(s=>p(s));
-  return String(str)
-    .replace(/[àáâãäå]/g,'a').replace(/[ÀÁÂÃÄÅ]/g,'A')
-    .replace(/[èéêë]/g,'e').replace(/[ÈÉÊË]/g,'E')
-    .replace(/[ìíîï]/g,'i').replace(/[ÌÍÎÏ]/g,'I')
-    .replace(/[òóôõöø]/g,'o').replace(/[ÒÓÔÕÖØ]/g,'O')
-    .replace(/[ùúûü]/g,'u').replace(/[ÙÚÛÜ]/g,'U')
-    .replace(/[ýÿ]/g,'y').replace(/[Ý]/g,'Y')
-    .replace(/[ñ]/g,'n').replace(/[Ñ]/g,'N')
-    .replace(/[ç]/g,'c').replace(/[Ç]/g,'C')
-    .replace(/[^ -ÿ]/g,'');
+  if(!str)return '';
+  if(Array.isArray(str))return str.map(function(s){return p(s);});
+  var s=String(str);
+  s=s.replace(/[\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5]/g,'a');
+  s=s.replace(/[\u00c0\u00c1\u00c2\u00c3\u00c4\u00c5]/g,'A');
+  s=s.replace(/[\u00e8\u00e9\u00ea\u00eb]/g,'e');
+  s=s.replace(/[\u00c8\u00c9\u00ca\u00cb]/g,'E');
+  s=s.replace(/[\u00ec\u00ed\u00ee\u00ef]/g,'i');
+  s=s.replace(/[\u00cc\u00cd\u00ce\u00cf]/g,'I');
+  s=s.replace(/[\u00f2\u00f3\u00f4\u00f5\u00f6\u00f8]/g,'o');
+  s=s.replace(/[\u00d2\u00d3\u00d4\u00d5\u00d6\u00d8]/g,'O');
+  s=s.replace(/[\u00f9\u00fa\u00fb\u00fc]/g,'u');
+  s=s.replace(/[\u00d9\u00da\u00db\u00dc]/g,'U');
+  s=s.replace(/[\u00fd\u00ff]/g,'y');
+  s=s.replace(/[\u00dd]/g,'Y');
+  s=s.replace(/[\u00f1]/g,'n');
+  s=s.replace(/[\u00d1]/g,'N');
+  s=s.replace(/[\u00e7]/g,'c');
+  s=s.replace(/[\u00c7]/g,'C');
+  s=s.replace(/[^\u0020-\u007e]/g,'');
+  return s;
 }
-// Proxy que sanitiza automaticamente o primeiro argumento do doc.text
 function mkPDF(doc){
   const orig=doc.text.bind(doc);
   doc.text=function(txt,...args){
