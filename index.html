@@ -457,9 +457,8 @@ tr:hover td{background:var(--sur2)}
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 const S={
   page:'dash',clientes:[],orcamentos:[],recibos:[],lancamentos:[],pagamentos:[],
   materiais:[
@@ -497,9 +496,8 @@ const S={
   _pagCid:null,_pagOrcId:null,_recNum:1
 };
 
-// ═══════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 const R=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const dt=ts=>ts?new Date(ts).toLocaleDateString('pt-BR'):'—';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -537,9 +535,8 @@ const anivHoje=()=>{
 function toast(msg,t=3000){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),t)}
 document.querySelectorAll('.mbg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open')}));
 
-// ═══════════════════════════════════════════════════
-// DRIVE
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function initDrive(){
   if(!window.google){setTimeout(initDrive,600);return}
   try{S.tc=google.accounts.oauth2.initTokenClient({
@@ -613,9 +610,8 @@ function loadLocal(){
   const cid=localStorage.getItem('p3d_cid');if(cid)S.clientId=cid;
 }
 
-// ═══════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function nav(page,id){
   S.page=page;S.detailId=id||null;
   // desktop sidebar
@@ -645,9 +641,8 @@ function renderPage(){
   else if(S.page==='cdet'){c.innerHTML=rCDet();a.innerHTML=`<button class="btn sm" onclick="nav('cli')">← Voltar</button><button class="btn pr" onclick="openOrc('${S.detailId}')">+ Orçamento</button>`}
 }
 
-// ═══════════════════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rDash(){
   const fat=S.orcamentos.filter(o=>['aprovado','entregue'].includes(o.status)).reduce((s,o)=>s+(o.total||0),0);
   const pend=S.orcamentos.filter(o=>['enviado','rascunho'].includes(o.status)).length;
@@ -691,9 +686,8 @@ function rDash(){
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════
-// CLIENTES
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rCli(list){
   list=list||S.clientes;
   return`<div class="tw">
@@ -741,9 +735,8 @@ function rCliR(list){
 }
 function filtC(q){const f=S.clientes.filter(c=>(c.nome+c.empresa+c.email+c.tel).toLowerCase().includes(q.toLowerCase()));document.getElementById('ctb').innerHTML=rCliR(f)}
 
-// ═══════════════════════════════════════════════════
-// DETALHE CLIENTE
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rCDet(){
   const c=S.clientes.find(x=>x.id===S.detailId);if(!c)return'';
   const orcs=S.orcamentos.filter(o=>o.clienteId===c.id).sort((a,b)=>b.criado-a.criado);
@@ -810,9 +803,8 @@ function rCDet(){
     <button class="btn sm dg" onclick="confDel('lanc','${l.id}')">✕</button></div></div>`).join('')}`:''}`;
 }
 
-// ═══════════════════════════════════════════════════
-// ORÇAMENTOS
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rOrcs(list){
   list=list||[...S.orcamentos].sort((a,b)=>b.criado-a.criado);
   return`<div class="tw">
@@ -856,9 +848,8 @@ function rOrcR(list){
 }
 function filtO(v){const f=v?S.orcamentos.filter(o=>o.status===v):S.orcamentos;document.getElementById('otb').innerHTML=rOrcR(f.sort((a,b)=>b.criado-a.criado))}
 
-// ═══════════════════════════════════════════════════
-// RECIBOS
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rRecibos(){
   const list=[...S.recibos].sort((a,b)=>b.ts-a.ts);
   return`<div class="tw">
@@ -892,9 +883,8 @@ function rRecibos(){
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════
-// FIADO
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rFiado(){
   const comF=S.clientes.filter(c=>fiadoSaldo(c.id)>0);
   const total=comF.reduce((s,c)=>s+fiadoSaldo(c.id),0);
@@ -933,9 +923,8 @@ function rFiado(){
   </div>`:''}`;
 }
 
-// ═══════════════════════════════════════════════════
-// MODAL CLIENTE
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function openCli(id){
   S.editC=id||null;
   document.getElementById('mc-t').textContent=id?'Editar cliente':'Novo cliente';
@@ -958,9 +947,8 @@ function saveCliente(){
   closeM('m-cli');saveDrive();toast(S.editC?'✓ Cliente atualizado':'✓ Cliente cadastrado!');renderPage();
 }
 
-// ═══════════════════════════════════════════════════
-// MODAL ORÇAMENTO
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function popOrc(cid){
   document.getElementById('oc').innerHTML='<option value="">Sem cliente</option>'+S.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
   if(cid)document.getElementById('oc').value=cid;
@@ -1040,9 +1028,8 @@ function saveOrc(){
   renderPage();
 }
 
-// ═══════════════════════════════════════════════════
-// MODAL RECIBO
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function onRecCli(){}
 function openRecibo(cid){
   const sel=document.getElementById('rc');
@@ -1099,9 +1086,8 @@ function saveRecibo(){
   renderPage();
 }
 
-// ═══════════════════════════════════════════════════
-// FIADO LANÇAMENTO
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function openLanc(cid){
   const sel=document.getElementById('fa-c');
   sel.innerHTML='<option value="">Selecione...</option>'+S.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
@@ -1119,9 +1105,8 @@ function saveLanc(){
   closeM('m-fiad');saveDrive();toast('✓ Lançamento adicionado!');renderPage();
 }
 
-// ═══════════════════════════════════════════════════
-// PAGAMENTO
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function openPagCli(cid){
   const cl=S.clientes.find(c=>c.id===cid);const saldo=fiadoSaldo(cid);
   S._pagCid=cid;S._pagOrcId=null;
@@ -1154,9 +1139,9 @@ function savePag(){
   closeM('m-pag');saveDrive();toast(`✓ Pagamento de ${R(valor)} registrado!`);renderPage();
 }
 
-// ═══════════════════════════════════════════════════
+// ---
 // PDF - ORÇAMENTO
-// ═══════════════════════════════════════════════════
+// ---
 function gerarPDF(tipo,id){
   if(!window.jspdf){toast('Aguarde o carregamento...');return}
   if(tipo==='orc')gerarPDFOrc(id);
@@ -1278,9 +1263,9 @@ function gerarPDFOrc(orcId){
   openM('m-pdf');
 }
 
-// ═══════════════════════════════════════════════════
+// ---
 // PDF - RECIBO
-// ═══════════════════════════════════════════════════
+// ---
 function gerarPDFRec(recId){
   const rec=S.recibos.find(x=>x.id===recId);if(!rec)return;
   const cl=S.clientes.find(c=>c.id===rec.clienteId);
@@ -1416,9 +1401,8 @@ function wppCob(cid){
   window.open(`https://wa.me/55${tel}?text=${msg}`,'_blank');
 }
 
-// ═══════════════════════════════════════════════════
-// CALCULADORA
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rCalc(){
   return`<div style="max-width:640px">
   <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px">
@@ -1494,9 +1478,8 @@ function scToOrc(){
     if(S._sc.pid)document.getElementById('opr').value=S._sc.pid;calcM();}},120);
 }
 
-// ═══════════════════════════════════════════════════
-// CONFIGURAÇÕES
-// ═══════════════════════════════════════════════════
+// ---
+// ---
 function rCfg(){
   const PM=S.cfg.pdfMostrar||{};const PP=S.cfg.pdfPagamentos||{};
   const chk=(key,lbl,obj,objName)=>`<label class="chk-row"><input type="checkbox" ${obj[key]!==false?'checked':''} onchange="S.cfg.${objName}['${key}']=this.checked"> ${lbl}</label>`;
@@ -1669,7 +1652,6 @@ function loadImg(input,key){
     saveDrive();nav('cfg');toast('✓ Imagem carregada!');};r.readAsDataURL(file);
 }
 
-// IMPRESSORAS
 function openImp(id){
   S.editImp=id||null;document.getElementById('mi-t').textContent=id?'Editar impressora':'Nova impressora';
   const p=id?S.impressoras.find(x=>x.id===id):{};
@@ -1689,7 +1671,6 @@ function saveImp(){
 function delImp(id){S.impressoras=S.impressoras.filter(x=>x.id!==id);saveDrive();toast('✓ Removida');nav('cfg')}
 function setImpPad(id){S.impressoras.forEach(p=>p.padrao=p.id===id);saveDrive();toast('✓ Padrão atualizado');nav('cfg')}
 
-// MATERIAIS
 function openMat(id){
   S.editMat=id||null;document.getElementById('mm-t').textContent=id?'Editar material':'Novo material';
   const m=id?S.materiais.find(x=>x.id===id):{};
@@ -1711,7 +1692,6 @@ function delMat(id){
 }
 function setMatPad(id){S.materiais.forEach(m=>m.padrao=m.id===id);saveDrive();toast('✓ Padrão atualizado');nav('cfg')}
 
-// UTILS
 function confDel(tipo,id){
   const msgs={cli:'Excluir este cliente?',orc:'Excluir este orçamento?',rec:'Excluir este recibo?',lanc:'Excluir este lançamento?'};
   document.getElementById('dl-t').textContent='Confirmar exclusão';
@@ -1725,7 +1705,6 @@ function confDel(tipo,id){
   };openM('m-del');
 }
 
-// INIT
 loadLocal();initDrive();renderPage();
 
 // Responsive drive icon
