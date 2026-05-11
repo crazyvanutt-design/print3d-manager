@@ -1148,6 +1148,29 @@ function gerarPDF(tipo,id){
   else if(tipo==='rec')gerarPDFRec(id);
 }
 
+// Converte caracteres especiais para ASCII compativel com jsPDF helvetica
+function p(str){
+  if(!str)return'';
+  if(Array.isArray(str))return str.map(s=>p(s));
+  return String(str)
+    .replace(/[àáâãäå]/g,'a').replace(/[ÀÁÂÃÄÅ]/g,'A')
+    .replace(/[èéêë]/g,'e').replace(/[ÈÉÊË]/g,'E')
+    .replace(/[ìíîï]/g,'i').replace(/[ÌÍÎÏ]/g,'I')
+    .replace(/[òóôõöø]/g,'o').replace(/[ÒÓÔÕÖØ]/g,'O')
+    .replace(/[ùúûü]/g,'u').replace(/[ÙÚÛÜ]/g,'U')
+    .replace(/[ýÿ]/g,'y').replace(/[Ý]/g,'Y')
+    .replace(/[ñ]/g,'n').replace(/[Ñ]/g,'N')
+    .replace(/[ç]/g,'c').replace(/[Ç]/g,'C')
+    .replace(/[^ -ÿ]/g,'');
+}
+// Proxy que sanitiza automaticamente o primeiro argumento do doc.text
+function mkPDF(doc){
+  const orig=doc.text.bind(doc);
+  doc.text=function(txt,...args){
+    return orig(Array.isArray(txt)?txt.map(s=>p(s)):p(txt),...args);
+  };
+  return doc;
+}
 function pdfHeader(doc,W,pad){
   doc.setFillColor(30,58,138);doc.rect(0,0,W,42,'F');
   const cfg=S.cfg;
@@ -1179,7 +1202,7 @@ function gerarPDFOrc(orcId){
   const cfg=S.cfg;const PM=cfg.pdfMostrar||{};const PP=cfg.pdfPagamentos||{};
   const pr=S.impressoras.find(p=>p.id===o.impressoraId);
   const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});mkPDF(doc);
   const W=210,H=297,pad=16;
   let y=pdfHeader(doc,W,pad);
   // label
@@ -1271,7 +1294,7 @@ function gerarPDFRec(recId){
   const cl=S.clientes.find(c=>c.id===rec.clienteId);
   const cfg=S.cfg;
   const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});mkPDF(doc);
   const W=210,H=297,pad=16;
   let y=pdfHeader(doc,W,pad);
   const emitente=rec.emitente||cfg.nomeLoja||'3D Cêntrico';
