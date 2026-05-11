@@ -477,6 +477,8 @@ const S={
        maqCusto:3.50,maqPotencia:150,energia:0.90,laborRate:40,margem:40,imposto:6,falha:5,
        pdfMostrar:{material:true,peso:true,tempo:true,qty:true,labor:true,extras:true,margem:false,imposto:false,desconto:true,unitario:true},
        pdfPagamentos:{pix:true,cartao:true,dinheiro:true,link:false,qrcode:true},
+       pdfTemplate:'',pdfTemplateOrc:'',pdfTemplateRec:'',
+       pdfTemplateTopoMm:55,pdfTemplateRodapeMm:25,
        formasPagamento:[
          {id:'fp1',nome:'Pix',ativo:true,detalhe:''},
          {id:'fp2',nome:'Dinheiro',ativo:true,detalhe:''},
@@ -515,8 +517,10 @@ const closeM=id=>document.getElementById(id).classList.remove('open');
 const isMob=()=>window.innerWidth<=768;
 function imgPreview(src,key,h){
   if(!src)return key==='assinatura'?'<div style="font-size:12px;color:var(--mt);margin-top:6px">Nenhuma assinatura cadastrada ainda.</div>':'';
-  const clearFn=key==='logo'?'S.cfg.logoBase64':key==='qrcode'?'S.cfg.qrcodeBase64':'S.cfg.assinaturaBase64';
-  return '<div style="margin-top:6px;display:flex;align-items:center;gap:8px"><img src="'+src+'" style="height:'+h+';border-radius:4px;border:1px solid var(--bdr);background:#f8f9fa;padding:2px"><button class="btn sm dg" onclick="'+clearFn+'=\'\';saveDrive();nav(\'cfg\')">Remover</button></div>';
+  const clearMap={logo:'S.cfg.logoBase64',qrcode:'S.cfg.qrcodeBase64',assinatura:'S.cfg.assinaturaBase64',tmpl:'S.cfg.pdfTemplate',tmplOrc:'S.cfg.pdfTemplateOrc',tmplRec:'S.cfg.pdfTemplateRec'};
+  const clearFn=clearMap[key]||'';
+  const lbl=key.startsWith('tmpl')?'Remover modelo':'Remover';
+  return '<div style="margin-top:6px;display:flex;align-items:center;gap:8px"><img src="'+src+'" style="height:'+h+';border-radius:4px;border:1px solid var(--bdr);background:#f8f9fa;padding:2px"><button class="btn sm dg" onclick="'+clearFn+'=\'\';saveDrive();nav(\'cfg\')">'+lbl+'</button></div>';
 }
 const fiadoSaldo=cid=>{
   const orcs=S.orcamentos.filter(o=>o.clienteId===cid&&(o.pagamento==='fiado'||o.pagamento==='parcial')).reduce((s,o)=>s+(o.saldoDevedor||0),0);
@@ -1205,19 +1209,50 @@ function mkPDF(doc){
   };
   return doc;
 }
+// Retorna true se deve usar template de fundo
+function usandoTemplate(tipo){
+  if(tipo==='orc')return !!(S.cfg.pdfTemplateOrc||S.cfg.pdfTemplate);
+  if(tipo==='rec')return !!(S.cfg.pdfTemplateRec||S.cfg.pdfTemplate);
+  return !!S.cfg.pdfTemplate;
+}
+function getTemplate(tipo){
+  if(tipo==='orc')return S.cfg.pdfTemplateOrc||S.cfg.pdfTemplate||null;
+  if(tipo==='rec')return S.cfg.pdfTemplateRec||S.cfg.pdfTemplate||null;
+  return S.cfg.pdfTemplate||null;
+}
+
+// Desenha template de fundo e retorna y de inicio do conteudo
+function pdfHeaderTemplate(doc,W,H,tipo){
+  const tmpl=getTemplate(tipo);
+  if(!tmpl)return pdfHeader(doc,W,16);
+  try{doc.addImage(tmpl,'PNG',0,0,W,H)}catch(e){
+    try{doc.addImage(tmpl,'JPEG',0,0,W,H)}catch(e2){}
+  }
+  return S.cfg.pdfTemplateTopoMm||55;
+}
+function pdfFooterTemplate(doc,W,H,tipo){
+  if(usandoTemplate(tipo))return;
+  pdfFooter(doc,W,H);
+}
+// Retorna o y maximo disponivel para conteudo (antes do rodape)
+function pdfMaxY(H,tipo){
+  if(usandoTemplate(tipo))return H-(S.cfg.pdfTemplateRodapeMm||25);
+  return H-20;
+}
+
 function pdfHeader(doc,W,pad){
   doc.setFillColor(30,58,138);doc.rect(0,0,W,42,'F');
   const cfg=S.cfg;
   if(cfg.logoBase64){try{doc.addImage(cfg.logoBase64,'PNG',pad,7,26,26)}catch(e){}}
   const lx=cfg.logoBase64?pad+30:pad;
   doc.setFontSize(17);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-  doc.text(cfg.nomeLoja||'3D Cêntrico',lx,17);
+  doc.text(cfg.nomeLoja||'3D Centrico',lx,17);
   const info=[];
-  if(cfg.whatsapp)info.push('📱 '+cfg.whatsapp);if(cfg.email)info.push('✉ '+cfg.email);if(cfg.site)info.push('🌐 '+cfg.site);
+  if(cfg.whatsapp)info.push(cfg.whatsapp);if(cfg.email)info.push(cfg.email);if(cfg.site)info.push(cfg.site);
   if(info.length){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);doc.text(info.join('   '),lx,24)}
-  const redes=[];if(cfg.instagram)redes.push('📷 '+cfg.instagram);if(cfg.facebook)redes.push('📘 '+cfg.facebook);if(cfg.tiktok)redes.push('🎵 '+cfg.tiktok);if(cfg.youtube)redes.push('▶ '+cfg.youtube);
+  const redes=[];if(cfg.instagram)redes.push(cfg.instagram);if(cfg.facebook)redes.push(cfg.facebook);if(cfg.tiktok)redes.push(cfg.tiktok);if(cfg.youtube)redes.push(cfg.youtube);
   if(redes.length){doc.setFontSize(7);doc.setTextColor(160,195,255);doc.text(redes.join('   '),lx,30)}
-  if(cfg.localizacao){doc.setFontSize(7);doc.setTextColor(160,195,255);doc.text('📍 '+cfg.localizacao,lx,36)}
+  if(cfg.localizacao){doc.setFontSize(7);doc.setTextColor(160,195,255);doc.text(cfg.localizacao,lx,36)}
   return 48;
 }
 
@@ -1225,8 +1260,8 @@ function pdfFooter(doc,W,H){
   const cfg=S.cfg;
   doc.setFillColor(241,245,249);doc.rect(0,H-16,W,16,'F');
   doc.setFontSize(8);doc.setFont('helvetica','italic');doc.setTextColor(100,116,139);
-  doc.text(cfg.assinatura||'Obrigado pela preferência!',W/2,H-9,{align:'center'});
-  const fl=[];if(cfg.site)fl.push('🌐 '+cfg.site);if(cfg.instagram)fl.push('📷 '+cfg.instagram);if(cfg.tiktok)fl.push('🎵 '+cfg.tiktok);if(cfg.localizacao)fl.push('📍 '+cfg.localizacao);
+  doc.text(cfg.assinatura||'Obrigado pela preferencia!',W/2,H-9,{align:'center'});
+  const fl=[];if(cfg.site)fl.push(cfg.site);if(cfg.instagram)fl.push(cfg.instagram);if(cfg.tiktok)fl.push(cfg.tiktok);if(cfg.localizacao)fl.push(cfg.localizacao);
   if(fl.length){doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text(fl.join('   '),W/2,H-4,{align:'center'})}
 }
 
@@ -1238,13 +1273,22 @@ function gerarPDFOrc(orcId){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});mkPDF(doc);
   const W=210,H=297,pad=16;
-  let y=pdfHeader(doc,W,pad);
-  // label
-  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-  doc.text('ORÇAMENTO',W-pad,14,{align:'right'});
-  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);
-  doc.text('#'+orcId.slice(-6).toUpperCase(),W-pad,20,{align:'right'});
-  doc.text(dt(o.criado),W-pad,26,{align:'right'});
+  let y=pdfHeaderTemplate(doc,W,H,'orc');
+  const usingTmpl=usandoTemplate('orc');
+  // label - ajusta cor do texto se usando template (fundo pode ser claro)
+  if(!usingTmpl){
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+    doc.text('ORCAMENTO',W-pad,14,{align:'right'});
+    doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);
+    doc.text('#'+orcId.slice(-6).toUpperCase(),W-pad,20,{align:'right'});
+    doc.text(dt(o.criado),W-pad,26,{align:'right'});
+  } else {
+    // sobre template: escreve identificacao com cor escura
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+    doc.text('ORCAMENTO #'+orcId.slice(-6).toUpperCase(),W-pad,y-8,{align:'right'});
+    doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+    doc.text(dt(o.criado),W-pad,y-3,{align:'right'});
+  }
   // cliente
   if(cl){
     doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,cl.empresa||cl.email?25:18,'F');
@@ -1312,7 +1356,7 @@ function gerarPDFOrc(orcId){
   if(o.obs){y+=4;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);doc.text('OBSERVAÇÕES',pad,y);y+=5;
     doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);
     const ol=doc.splitTextToSize(o.obs,W-pad*2);doc.text(ol,pad,y)}
-  pdfFooter(doc,W,H);
+  pdfFooterTemplate(doc,W,H,'orc');
   S._pdf=doc;S._pdfOrcId=orcId;S._pdfMode='orc';
   const blob=doc.output('blob');
   document.getElementById('pdf-fr').src=URL.createObjectURL(blob);
@@ -1330,14 +1374,22 @@ function gerarPDFRec(recId){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});mkPDF(doc);
   const W=210,H=297,pad=16;
-  let y=pdfHeader(doc,W,pad);
-  const emitente=rec.emitente||cfg.nomeLoja||'3D Cêntrico';
+  let y=pdfHeaderTemplate(doc,W,H,'rec');
+  const usingTmpl=usandoTemplate('rec');
+  const emitente=rec.emitente||cfg.nomeLoja||'3D Centrico';
   // label
-  doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-  doc.text('RECIBO DE PAGAMENTO',W-pad,14,{align:'right'});
-  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);
-  doc.text('Nº '+rec.numero,W-pad,21,{align:'right'});
-  doc.text(dt(rec.ts),W-pad,27,{align:'right'});
+  if(!usingTmpl){
+    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+    doc.text('RECIBO DE PAGAMENTO',W-pad,14,{align:'right'});
+    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(180,210,255);
+    doc.text('N '+rec.numero,W-pad,21,{align:'right'});
+    doc.text(dt(rec.ts),W-pad,27,{align:'right'});
+  } else {
+    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);
+    doc.text('RECIBO DE PAGAMENTO  N '+rec.numero,W-pad,y-8,{align:'right'});
+    doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+    doc.text(dt(rec.ts),W-pad,y-3,{align:'right'});
+  }
   y+=6;
   // emitente x cliente
   doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,10,'F');
@@ -1404,7 +1456,7 @@ function gerarPDFRec(recId){
   doc.text(cl?cl.nome:'Cliente',W-pad-32,y+15,{align:'center'});doc.text('Assinatura do recebedor',W-pad-32,y+19,{align:'center'});
   y+=28;
   if(cfg.reciboRodape){doc.setFontSize(8.5);doc.setFont('helvetica','italic');doc.setTextColor(100,116,139);doc.text(cfg.reciboRodape,W/2,y,{align:'center'})}
-  pdfFooter(doc,W,H);
+  pdfFooterTemplate(doc,W,H,'rec');
   S._pdf=doc;S._pdfOrcId=recId;S._pdfMode='rec';
   const blob=doc.output('blob');
   document.getElementById('pdf-fr').src=URL.createObjectURL(blob);
@@ -1587,6 +1639,42 @@ function rCfg(){
     <button class="btn pr" onclick="saveCfgN()">Salvar dados</button>
   </div></div></div>
 
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Modelo de fundo do PDF</h3><p>Imagem A4 com seu topo e rodape personalizados — o conteudo e colocado por cima</p></div></div>
+  <div class="cb">
+    <div style="background:var(--acb);border:1px solid #c7d9ff;border-radius:var(--rs);padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.6">
+      <strong>Como funciona:</strong> crie uma imagem PNG no <strong>Canva, Photoshop</strong> ou qualquer editor no tamanho <strong>A4 (210 x 297 mm / 794 x 1123 px a 96dpi)</strong> com seu topo e rodape personalizados. Deixe a area do meio em <strong>branco</strong>. Faca upload aqui e o app usara sua imagem como fundo do PDF, colocando os dados do orcamento/recibo na area branca.
+    </div>
+    <div class="sdiv">Margens da area de conteudo</div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="fg"><label>Espaco reservado para o TOPO (mm)</label><input id="cfg-tmpl-topo" type="number" value="${S.cfg.pdfTemplateTopoMm||55}" min="20" max="150" step="5" placeholder="55"><div style="font-size:11px;color:var(--mt);margin-top:4px">Quantos mm do topo pertencem ao seu modelo (onde o conteudo NAO deve entrar)</div></div>
+      <div class="fg"><label>Espaco reservado para o RODAPE (mm)</label><input id="cfg-tmpl-rod" type="number" value="${S.cfg.pdfTemplateRodapeMm||25}" min="10" max="100" step="5" placeholder="25"><div style="font-size:11px;color:var(--mt);margin-top:4px">Quantos mm do rodape pertencem ao seu modelo</div></div>
+    </div>
+    <button class="btn pr" onclick="saveCfgTemplateMargens()" style="margin-bottom:16px">Salvar margens</button>
+    <div class="sdiv">Templates por tipo de documento</div>
+    <div class="g2">
+      <div class="fg">
+        <label>Modelo para ORCAMENTOS (PNG/JPG)</label>
+        <input type="file" id="cfg-tmpl-orc" accept="image/*" onchange="loadImg(this,'tmplOrc')" style="padding:5px;font-size:12px">
+        <div id="prev-tmpl-orc">${imgPreview(S.cfg.pdfTemplateOrc,'tmplOrc','60px')}</div>
+        <div style="font-size:11px;color:var(--mt);margin-top:4px">Se vazio, usa o modelo geral abaixo</div>
+      </div>
+      <div class="fg">
+        <label>Modelo para RECIBOS (PNG/JPG)</label>
+        <input type="file" id="cfg-tmpl-rec" accept="image/*" onchange="loadImg(this,'tmplRec')" style="padding:5px;font-size:12px">
+        <div id="prev-tmpl-rec">${imgPreview(S.cfg.pdfTemplateRec,'tmplRec','60px')}</div>
+        <div style="font-size:11px;color:var(--mt);margin-top:4px">Se vazio, usa o modelo geral abaixo</div>
+      </div>
+      <div class="fg s2">
+        <label>Modelo GERAL (usado para ambos se nao houver especifico)</label>
+        <input type="file" id="cfg-tmpl-geral" accept="image/*" onchange="loadImg(this,'tmpl')" style="padding:5px;font-size:12px">
+        <div id="prev-tmpl-geral">${imgPreview(S.cfg.pdfTemplate,'tmpl','60px')}</div>
+      </div>
+    </div>
+    <div style="background:var(--wnb);border:1px solid #f0d080;border-radius:var(--rs);padding:10px 14px;margin-top:12px;font-size:12px">
+      <strong>Dica para o Canva:</strong> Crie um design no formato "A4" → adicione seu cabecalho e rodape → deixe o miolo em branco → baixe como PNG de alta qualidade → faca upload aqui. O limite de upload e de 5MB.
+    </div>
+  </div></div>
+
   <div class="cs"><div class="ch"><div class="ch-t"><h3>Pagamentos e PDF</h3><p>Dados exibidos no PDF</p></div></div>
   <div class="cb"><div class="g2">
     <div class="fg"><label>Chave Pix</label><input id="cfg-pix" value="${S.cfg.pix||''}" placeholder="CPF, e-mail, telefone..."></div>
@@ -1702,14 +1790,24 @@ function toggleFP(id,val){
 function updateFPDetalhe(id,val){
   const f=S.cfg.formasPagamento?.find(x=>x.id===id);if(f)f.detalhe=val;
 }
+function saveCfgTemplateMargens(){
+  S.cfg.pdfTemplateTopoMm=+document.getElementById('cfg-tmpl-topo')?.value||55;
+  S.cfg.pdfTemplateRodapeMm=+document.getElementById('cfg-tmpl-rod')?.value||25;
+  saveDrive();toast('Margens salvas!');
+}
 function loadImg(input,key){
   const file=input.files[0];if(!file)return;
-  if(file.size>5000000)return toast('⚠ Imagem muito grande. Use menos de 5MB.');
+  if(file.size>5000000)return toast('Imagem muito grande. Use menos de 5MB.');
   const r=new FileReader();r.onload=e=>{
-    if(key==='logo')S.cfg.logoBase64=e.target.result;
-    else if(key==='qrcode')S.cfg.qrcodeBase64=e.target.result;
-    else if(key==='assinatura')S.cfg.assinaturaBase64=e.target.result;
-    saveDrive();nav('cfg');toast('✓ Imagem carregada!');};r.readAsDataURL(file);
+    const val=e.target.result;
+    if(key==='logo')S.cfg.logoBase64=val;
+    else if(key==='qrcode')S.cfg.qrcodeBase64=val;
+    else if(key==='assinatura')S.cfg.assinaturaBase64=val;
+    else if(key==='tmpl')S.cfg.pdfTemplate=val;
+    else if(key==='tmplOrc')S.cfg.pdfTemplateOrc=val;
+    else if(key==='tmplRec')S.cfg.pdfTemplateRec=val;
+    saveDrive();nav('cfg');toast('Imagem carregada!');
+  };r.readAsDataURL(file);
 }
 
 function openImp(id){
@@ -1767,7 +1865,7 @@ function confDel(tipo,id){
 
 loadLocal();initDrive();renderPage();
 
-// Renova o token automaticamente a cada 10 minutos (token dura 1h)
+// Renova o token automaticamente a cada 50 minutos (token dura 1h)
 setInterval(()=>{
   if(S.driveOk&&S.tc&&S.clientId){
     S._autoConnect=true;
