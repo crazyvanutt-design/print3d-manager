@@ -462,17 +462,17 @@ tr:hover td{background:var(--sur2)}
 const S={
   page:'dash',clientes:[],orcamentos:[],recibos:[],lancamentos:[],pagamentos:[],
   materiais:[
-    {id:'m1',nome:'PLA',preco:0.08,desc:'Versátil, fácil de imprimir',padrao:true},
-    {id:'m2',nome:'PETG',preco:0.10,desc:'Resistente à umidade',padrao:false},
+    {id:'m1',nome:'PLA',preco:0.08,desc:'Versatil, facil de imprimir',padrao:true},
+    {id:'m2',nome:'PETG',preco:0.10,desc:'Resistente a umidade',padrao:false},
     {id:'m3',nome:'ABS',preco:0.14,desc:'Alta temperatura',padrao:false},
-    {id:'m4',nome:'TPU',preco:0.25,desc:'Flexível',padrao:false},
+    {id:'m4',nome:'TPU',preco:0.25,desc:'Flexivel',padrao:false},
     {id:'m5',nome:'ASA',preco:0.35,desc:'UV-resistente',padrao:false},
-    {id:'m6',nome:'Nylon',preco:0.50,desc:'Alta resistência',padrao:false}
+    {id:'m6',nome:'Nylon',preco:0.50,desc:'Alta resistencia',padrao:false}
   ],
   impressoras:[],
   cfg:{nomeLoja:'',whatsapp:'',email:'',site:'',instagram:'',facebook:'',
        localizacao:'',linkPagamento:'',pix:'',pixTipo:'chave',
-       assinatura:'Qualquer dúvida, estou à disposição! 😊',
+       assinatura:'Qualquer duvida, estou a disposicao! ',
        logoBase64:'',qrcodeBase64:'',
        maqCusto:3.50,maqPotencia:150,energia:0.90,laborRate:40,margem:40,imposto:6,falha:5,
        pdfMostrar:{material:true,peso:true,tempo:true,qty:true,labor:true,extras:true,margem:false,imposto:false,desconto:true,unitario:true},
@@ -482,10 +482,10 @@ const S={
        formasPagamento:[
          {id:'fp1',nome:'Pix',ativo:true,detalhe:''},
          {id:'fp2',nome:'Dinheiro',ativo:true,detalhe:''},
-         {id:'fp3',nome:'Cartão de débito',ativo:true,detalhe:''},
-         {id:'fp4',nome:'Cartão de crédito',ativo:true,detalhe:''},
-         {id:'fp5',nome:'Transferência bancária',ativo:false,detalhe:''},
-         {id:'fp6',nome:'Boleto bancário',ativo:false,detalhe:''},
+         {id:'fp3',nome:'Cartao de debito',ativo:true,detalhe:''},
+         {id:'fp4',nome:'Cartao de credito',ativo:true,detalhe:''},
+         {id:'fp5',nome:'Transferencia bancaria',ativo:false,detalhe:''},
+         {id:'fp6',nome:'Boleto bancario',ativo:false,detalhe:''},
          {id:'fp7',nome:'Link de pagamento',ativo:false,detalhe:''}
        ],
        assinaturaBase64:'',usarAssinatura:false,
@@ -501,16 +501,16 @@ const S={
 // ---
 // ---
 const R=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const dt=ts=>ts?new Date(ts).toLocaleDateString('pt-BR'):'—';
+const dt=ts=>ts?new Date(ts).toLocaleDateString('pt-BR'):'-';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const vv=id=>document.getElementById(id)?.value.trim()||'';
 const gn=id=>+(document.getElementById(id)?.value||0);
 const bdg=(cls,lbl)=>`<span class="badge ${cls}">${lbl}</span>`;
-const STATUS={rascunho:['gy','Rascunho'],enviado:['bl','Enviado'],aprovado:['gn','Aprovado'],producao:['wn','Em produção'],entregue:['gn','Entregue'],cancelado:['rd','Cancelado']};
+const STATUS={rascunho:['gy','Rascunho'],enviado:['bl','Enviado'],aprovado:['gn','Aprovado'],producao:['wn','Em producao'],entregue:['gn','Entregue'],cancelado:['rd','Cancelado']};
 const bSt=s=>{const[c,l]=STATUS[s]||['gy',s];return bdg(c,l)};
 const matName=p=>S.materiais.find(x=>x.preco==p)?.nome||'Material';
 const matOpts=sel=>S.materiais.map(m=>`<option value="${m.preco}"${m.preco==sel||(sel===undefined&&m.padrao)?'selected':''}>${m.nome} (R$ ${m.preco.toFixed(2)}/g)</option>`).join('');
-const prOpts=sel=>`<option value="">— Padrão global —</option>`+S.impressoras.map(p=>`<option value="${p.id}"${p.id===sel||(sel===undefined&&p.padrao)?'selected':''}>${p.nome}</option>`).join('');
+const prOpts=sel=>`<option value="">- Padrao global -</option>`+S.impressoras.map(p=>`<option value="${p.id}"${p.id===sel||(sel===undefined&&p.padrao)?'selected':''}>${p.nome}</option>`).join('');
 const defMat=()=>S.materiais.find(m=>m.padrao)||S.materiais[0]||{preco:0.08};
 const openM=id=>document.getElementById(id).classList.add('open');
 const closeM=id=>document.getElementById(id).classList.remove('open');
@@ -560,7 +560,7 @@ function initDrive(){
         localStorage.setItem('p3d_cid',S.clientId);
         setDriveUI(true);
         await loadDrive();renderPage();
-        if(!S._autoConnect)toast('✓ Google Drive conectado!');
+        if(!S._autoConnect)toast('OK Google Drive conectado!');
         S._autoConnect=false;
       }
     });
@@ -612,7 +612,7 @@ async function loadDrive(){
   if(d.impressoras)S.impressoras=d.impressoras;
   if(d.cfg){S.cfg=Object.assign({},S.cfg,d.cfg);if(d.cfg.formasPagamento)S.cfg.formasPagamento=d.cfg.formasPagamento;}
   if(d.recNum)S._recNum=d.recNum;
-  toast('✓ Dados carregados!');
+  toast('OK Dados carregados!');
 }
 async function saveDrive(){
   if(!S.driveOk){saveLocal();return}
@@ -656,19 +656,19 @@ function nav(page,id){
 }
 
 function renderPage(){
-  const T={dash:'Dashboard',cli:'Clientes',orc:'Orçamentos',rec:'Recibos',fia:'Fiado / Crédito',calc:'Calculadora',cfg:'Configurações',cdet:'Cliente'};
+  const T={dash:'Dashboard',cli:'Clientes',orc:'Orcamentos',rec:'Recibos',fia:'Fiado / Credito',calc:'Calculadora',cfg:'Configuracoes',cdet:'Cliente'};
   document.getElementById('ptitle').textContent=T[S.page]||'';
   const c=document.getElementById('content'),a=document.getElementById('tact');
   a.innerHTML='';
   setDriveUI(S.driveOk);
   if(S.page==='dash')c.innerHTML=rDash();
   else if(S.page==='cli'){c.innerHTML=rCli();a.innerHTML='<button class="btn pr" onclick="openCli()">+ Cliente</button>'}
-  else if(S.page==='orc'){c.innerHTML=rOrcs();a.innerHTML='<button class="btn pr" onclick="openOrc()">+ Orçamento</button>'}
+  else if(S.page==='orc'){c.innerHTML=rOrcs();a.innerHTML='<button class="btn pr" onclick="openOrc()">+ Orcamento</button>'}
   else if(S.page==='rec'){c.innerHTML=rRecibos();a.innerHTML='<button class="btn pr" onclick="openRecibo()">+ Recibo</button>'}
-  else if(S.page==='fia'){c.innerHTML=rFiado();a.innerHTML='<button class="btn wn" onclick="openLanc()">+ Lançamento</button>'}
+  else if(S.page==='fia'){c.innerHTML=rFiado();a.innerHTML='<button class="btn wn" onclick="openLanc()">+ Lancamento</button>'}
   else if(S.page==='calc'){c.innerHTML=rCalc();calcSC()}
   else if(S.page==='cfg')c.innerHTML=rCfg();
-  else if(S.page==='cdet'){c.innerHTML=rCDet();a.innerHTML=`<button class="btn sm" onclick="nav('cli')">← Voltar</button><button class="btn pr" onclick="openOrc('${S.detailId}')">+ Orçamento</button>`}
+  else if(S.page==='cdet'){c.innerHTML=rCDet();a.innerHTML=`<button class="btn sm" onclick="nav('cli')">< Voltar</button><button class="btn pr" onclick="openOrc('${S.detailId}')">+ Orcamento</button>`}
 }
 
 // ---
@@ -680,8 +680,8 @@ function rDash(){
   const aniv=anivHoje();
   const rec=[...S.orcamentos].sort((a,b)=>b.criado-a.criado).slice(0,5);
   return`
-  ${!S.driveOk?`<div class="banner">⚠️<span style="flex:1">Conecte o Google Drive para salvar seus dados.</span><button class="btn sm" onclick="connectDrive()">Conectar</button></div>`:''}
-  ${aniv.length?`<div class="banner" style="background:var(--okb);border-color:#8ed4b0">🎂<span style="flex:1">Aniversário hoje: <strong>${aniv.map(c=>c.nome.split(' ')[0]).join(', ')}</strong></span>${aniv[0]?.tel?`<button class="btn sm ok" onclick="wppAniv('${aniv[0].id}')">Parabenizar 📱</button>`:''}</div>`:''}
+  ${!S.driveOk?`<div class="banner">(!)<span style="flex:1">Conecte o Google Drive para salvar seus dados.</span><button class="btn sm" onclick="connectDrive()">Conectar</button></div>`:''}
+  ${aniv.length?`<div class="banner" style="background:var(--okb);border-color:#8ed4b0"><span style="flex:1">Aniversario hoje: <strong>${aniv.map(c=>c.nome.split(' ')[0]).join(', ')}</strong></span>${aniv[0]?.tel?`<button class="btn sm ok" onclick="wppAniv('${aniv[0].id}')">Parabenizar </button>`:''}</div>`:''}
   <div class="sc">
     <div class="scard"><div class="sl">Clientes</div><div class="sv">${S.clientes.length}</div><div class="ss">cadastrados</div></div>
     <div class="scard"><div class="sl">Faturamento</div><div class="sv" style="font-size:16px">${R(fat)}</div><div class="ss">aprovados+entregues</div></div>
@@ -691,17 +691,17 @@ function rDash(){
   <!-- Mobile quick actions -->
   <div class="desktop-only" style="display:none"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px" class="mobile-cards">
-    <button class="btn pr full" onclick="openOrc()">+ Orçamento</button>
+    <button class="btn pr full" onclick="openOrc()">+ Orcamento</button>
     <button class="btn full" style="border-color:var(--ac);color:var(--ac)" onclick="openRecibo()">+ Recibo</button>
     <button class="btn full" onclick="openCli()">+ Cliente</button>
     <button class="btn wn full" onclick="openLanc()">+ Fiado</button>
   </div>
   <div class="tw">
-    <div class="th2"><span class="ttl">Orçamentos recentes</span><button class="btn sm" onclick="nav('orc')">Ver todos</button></div>
+    <div class="th2"><span class="ttl">Orcamentos recentes</span><button class="btn sm" onclick="nav('orc')">Ver todos</button></div>
     ${rec.length?`
     <div class="desktop-only"><table><thead><tr><th>Projeto</th><th>Cliente</th><th>Status</th><th>Pagamento</th><th>Total</th><th>Data</th></tr></thead><tbody>
     ${rec.map(o=>{const cl=S.clientes.find(c=>c.id===o.clienteId);return`<tr>
-      <td><strong>${o.nome}</strong></td><td>${cl?cl.nome:'—'}</td><td>${bSt(o.status)}</td>
+      <td><strong>${o.nome}</strong></td><td>${cl?cl.nome:'-'}</td><td>${bSt(o.status)}</td>
       <td>${bPg(o.pagamento,o.saldoDevedor)}</td>
       <td style="font-family:'DM Mono',monospace;font-weight:500;color:var(--ac)">${R(o.total)}</td>
       <td style="color:var(--mt)">${dt(o.criado)}</td></tr>`;}).join('')}</tbody></table></div>
@@ -709,10 +709,10 @@ function rDash(){
     ${rec.map(o=>{const cl=S.clientes.find(c=>c.id===o.clienteId);return`<div class="mcard" onclick="nav('orc')">
       <div class="mcard-row"><div class="mcard-body">
         <div class="mcard-title">${o.nome}</div>
-        <div class="mcard-sub">${cl?cl.nome:'Sem cliente'} · ${dt(o.criado)}</div>
+        <div class="mcard-sub">${cl?cl.nome:'Sem cliente'}  ${dt(o.criado)}</div>
         <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">${bSt(o.status)} ${bPg(o.pagamento,o.saldoDevedor)}</div>
       </div><div class="mcard-val">${R(o.total)}</div></div></div>`;}).join('')}
-    </div>`:`<div class="empty"><div class="ei">◎</div><p>Nenhum orçamento ainda</p><button class="btn pr" onclick="openOrc()">Criar orçamento</button></div>`}
+    </div>`:`<div class="empty"><div class="ei"></div><p>Nenhum orcamento ainda</p><button class="btn pr" onclick="openOrc()">Criar orcamento</button></div>`}
   </div>`;
 }
 
@@ -726,10 +726,10 @@ function rCli(list){
     <div id="ctb">${rCliR(list)}</div></div>`;
 }
 function rCliR(list){
-  if(!list.length)return`<div class="empty"><div class="ei">◉</div><p>Nenhum cliente</p><button class="btn pr" onclick="openCli()">+ Novo cliente</button></div>`;
+  if(!list.length)return`<div class="empty"><div class="ei"></div><p>Nenhum cliente</p><button class="btn pr" onclick="openCli()">+ Novo cliente</button></div>`;
   const hoje=new Date();
   // desktop table
-  const tbl=`<div class="desktop-only"><table><thead><tr><th>Nome</th><th>Contato</th><th>Nascimento</th><th>Desconto</th><th>Fiado</th><th>Ações</th></tr></thead><tbody>
+  const tbl=`<div class="desktop-only"><table><thead><tr><th>Nome</th><th>Contato</th><th>Nascimento</th><th>Desconto</th><th>Fiado</th><th>Acoes</th></tr></thead><tbody>
   ${list.map(c=>{
     const saldo=fiadoSaldo(c.id),lim=c.fiadoLimite||0,pct=lim>0?Math.min(100,(saldo/lim)*100):0;
     const ini=c.nome.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
@@ -739,10 +739,10 @@ function rCliR(list){
       <div class="av" style="width:33px;height:33px;font-size:12px">${ini}</div>
       <div><div style="font-weight:500">${c.nome}</div>${c.empresa?`<div style="font-size:11px;color:var(--mt)">${c.empresa}</div>`:''}</div></div></td>
     <td style="font-size:12px">${c.tel?`<div>${c.tel}</div>`:''}${c.email?`<div style="color:var(--mt)">${c.email}</div>`:''}</td>
-    <td>${anivStr?`<span style="font-size:12px${anivA?';color:var(--ok);font-weight:600':''}">🎂 ${anivStr}</span>`:'—'}</td>
-    <td>${c.desconto?bdg('gn',c.desconto+'%'):'—'}</td>
-    <td>${saldo>0?`<div style="font-size:12px;font-weight:600;color:var(--wn)">${R(saldo)}</div>${lim>0?`<div class="pb"><div class="pf" style="width:${pct}%;background:${pct>=90?'var(--dg)':'var(--wn)'}"></div></div>`:''}`:'—'}</td>
-    <td><div style="display:flex;gap:4px"><button class="btn sm" onclick="nav('cdet','${c.id}')">Ver</button><button class="btn sm" onclick="openCli('${c.id}')">Editar</button><button class="btn sm dg" onclick="confDel('cli','${c.id}')">✕</button></div></td></tr>`;
+    <td>${anivStr?`<span style="font-size:12px${anivA?';color:var(--ok);font-weight:600':''}"> ${anivStr}</span>`:'-'}</td>
+    <td>${c.desconto?bdg('gn',c.desconto+'%'):'-'}</td>
+    <td>${saldo>0?`<div style="font-size:12px;font-weight:600;color:var(--wn)">${R(saldo)}</div>${lim>0?`<div class="pb"><div class="pf" style="width:${pct}%;background:${pct>=90?'var(--dg)':'var(--wn)'}"></div></div>`:''}`:'-'}</td>
+    <td><div style="display:flex;gap:4px"><button class="btn sm" onclick="nav('cdet','${c.id}')">Ver</button><button class="btn sm" onclick="openCli('${c.id}')">Editar</button><button class="btn sm dg" onclick="confDel('cli','${c.id}')">X</button></div></td></tr>`;
   }).join('')}</tbody></table></div>`;
   // mobile cards
   const mob=`<div class="mobile-cards" style="padding:10px">${list.map(c=>{
@@ -751,7 +751,7 @@ function rCliR(list){
       <div class="av" style="width:40px;height:40px;font-size:14px">${ini}</div>
       <div class="mcard-body">
         <div class="mcard-title">${c.nome}</div>
-        <div class="mcard-sub">${[c.empresa,c.tel,c.cidade].filter(Boolean).join(' · ')}</div>
+        <div class="mcard-sub">${[c.empresa,c.tel,c.cidade].filter(Boolean).join('  ')}</div>
         <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
           ${c.desconto?bdg('gn',c.desconto+'% desc.'):''}
           ${saldo>0?bdg('rd','Fiado '+R(saldo)):''}
@@ -759,7 +759,7 @@ function rCliR(list){
       </div>
       <div style="display:flex;flex-direction:column;gap:5px">
         <button class="btn sm" onclick="event.stopPropagation();openCli('${c.id}')">Editar</button>
-        <button class="btn sm dg" onclick="event.stopPropagation();confDel('cli','${c.id}')">✕</button>
+        <button class="btn sm dg" onclick="event.stopPropagation();confDel('cli','${c.id}')">X</button>
       </div></div></div>`;}).join('')}</div>`;
   return tbl+mob;
 }
@@ -780,9 +780,9 @@ function rCDet(){
       <div class="av" style="width:50px;height:50px;font-size:17px">${ini}</div>
       <div style="flex:1;min-width:140px">
         <div style="font-size:16px;font-weight:600">${c.nome}</div>
-        <div style="font-size:12px;color:var(--mt);margin-top:2px">${[c.empresa,c.cidade].filter(Boolean).join(' · ')}</div>
-        ${c.tel?`<div style="font-size:12px;color:var(--mt);margin-top:3px">📱 ${c.tel}</div>`:''}
-        ${c.email?`<div style="font-size:12px;color:var(--mt)">✉ ${c.email}</div>`:''}
+        <div style="font-size:12px;color:var(--mt);margin-top:2px">${[c.empresa,c.cidade].filter(Boolean).join('  ')}</div>
+        ${c.tel?`<div style="font-size:12px;color:var(--mt);margin-top:3px"> ${c.tel}</div>`:''}
+        ${c.email?`<div style="font-size:12px;color:var(--mt)"> ${c.email}</div>`:''}
         ${c.desconto?`<div style="margin-top:5px">${bdg('gn',c.desconto+'% desconto fixo')}</div>`:''}
       </div>
       <div style="text-align:right">
@@ -792,45 +792,45 @@ function rCDet(){
       </div>
     </div>
     <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
-      <button class="btn sm" onclick="openCli('${c.id}')">✏ Editar</button>
-      <button class="btn sm pr" onclick="openOrc('${c.id}')">+ Orçamento</button>
+      <button class="btn sm" onclick="openCli('${c.id}')"> Editar</button>
+      <button class="btn sm pr" onclick="openOrc('${c.id}')">+ Orcamento</button>
       <button class="btn sm" onclick="openRecibo('${c.id}')">+ Recibo</button>
-      ${saldo>0?`<button class="btn sm wn" onclick="openPagCli('${c.id}')">💰 Receber</button>`:''}
-      ${c.tel?`<button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppAniv('${c.id}')">📱</button>`:''}
+      ${saldo>0?`<button class="btn sm wn" onclick="openPagCli('${c.id}')"> Receber</button>`:''}
+      ${c.tel?`<button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppAniv('${c.id}')"></button>`:''}
     </div>
   </div>
-  ${orcs.length?`<div style="font-size:13px;font-weight:600;margin-bottom:8px">Orçamentos (${orcs.length})</div>
+  ${orcs.length?`<div style="font-size:13px;font-weight:600;margin-bottom:8px">Orcamentos (${orcs.length})</div>
   ${orcs.map(o=>`<div class="mcard">
     <div class="mcard-row"><div class="mcard-body">
       <div class="mcard-title">${o.nome}</div>
-      <div class="mcard-sub">${o.material}·${o.peso}g·${o.qty}x·${dt(o.criado)}</div>
+      <div class="mcard-sub">${o.material}${o.peso}g${o.qty}x${dt(o.criado)}</div>
       <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">${bSt(o.status)} ${bPg(o.pagamento,o.saldoDevedor)}</div>
     </div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
       <div class="mcard-val">${R(o.total)}</div>
       <div style="display:flex;gap:4px">
-        ${(o.pagamento==='fiado'||o.pagamento==='parcial')&&o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')">💰</button>`:''}
-        <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')">📄</button>
-        <button class="btn sm dg" onclick="confDel('orc','${o.id}')">✕</button>
+        ${(o.pagamento==='fiado'||o.pagamento==='parcial')&&o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')"></button>`:''}
+        <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')"></button>
+        <button class="btn sm dg" onclick="confDel('orc','${o.id}')">X</button>
       </div></div></div></div>`).join('')}`:''}
   ${recs.length?`<div style="font-size:13px;font-weight:600;margin:14px 0 8px">Recibos (${recs.length})</div>
   ${recs.map(r=>`<div class="mcard">
     <div class="mcard-row"><div class="mcard-body">
       <div class="mcard-title">Recibo #${r.numero}</div>
-      <div class="mcard-sub">${r.descricao} · ${r.forma} · ${dt(r.ts)}</div>
+      <div class="mcard-sub">${r.descricao}  ${r.forma}  ${dt(r.ts)}</div>
     </div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
       <div class="mcard-val">${R(r.valor)}</div>
       <div style="display:flex;gap:4px">
-        <button class="btn sm pr" onclick="gerarPDF('rec','${r.id}')">📄</button>
-        <button class="btn sm dg" onclick="confDel('rec','${r.id}')">✕</button>
+        <button class="btn sm pr" onclick="gerarPDF('rec','${r.id}')"></button>
+        <button class="btn sm dg" onclick="confDel('rec','${r.id}')">X</button>
       </div></div></div></div>`).join('')}`:''}
-  ${lancs.length?`<div style="font-size:13px;font-weight:600;margin:14px 0 8px">Lançamentos (${lancs.length})</div>
+  ${lancs.length?`<div style="font-size:13px;font-weight:600;margin:14px 0 8px">Lancamentos (${lancs.length})</div>
   ${lancs.map(l=>`<div class="mcard" style="${l.tipo==='debito'?'border-color:#f8c9c9':'border-color:#8ed4b0'}">
     <div class="mcard-row"><div class="mcard-body">
       <div class="mcard-title">${l.desc}</div>
-      <div class="mcard-sub">${dt(l.ts)}${l.venc?` · Venc: ${dt(new Date(l.venc+'T12:00:00').getTime())}`:''}</div>
+      <div class="mcard-sub">${dt(l.ts)}${l.venc?`  Venc: ${dt(new Date(l.venc+'T12:00:00').getTime())}`:''}</div>
     </div>
     <div style="font-family:'DM Mono',monospace;font-weight:600;color:${l.tipo==='debito'?'var(--dg)':'var(--ok)'}">${l.tipo==='debito'?'+':'-'}${R(l.valor)}</div>
-    <button class="btn sm dg" onclick="confDel('lanc','${l.id}')">✕</button></div></div>`).join('')}`:''}`;
+    <button class="btn sm dg" onclick="confDel('lanc','${l.id}')">X</button></div></div>`).join('')}`:''}`;
 }
 
 // ---
@@ -838,41 +838,41 @@ function rCDet(){
 function rOrcs(list){
   list=list||[...S.orcamentos].sort((a,b)=>b.criado-a.criado);
   return`<div class="tw">
-    <div class="th2"><span class="ttl">Orçamentos (${S.orcamentos.length})</span>
+    <div class="th2"><span class="ttl">Orcamentos (${S.orcamentos.length})</span>
       <select style="font-size:13px;padding:6px 10px;border:1px solid var(--bdr);border-radius:var(--rs);background:var(--bg)" onchange="filtO(this.value)">
         <option value="">Todos</option><option>rascunho</option><option>enviado</option><option>aprovado</option><option>producao</option><option>entregue</option><option>cancelado</option>
       </select></div>
     <div id="otb">${rOrcR(list)}</div></div>`;
 }
 function rOrcR(list){
-  if(!list.length)return`<div class="empty"><div class="ei">◎</div><p>Nenhum orçamento</p><button class="btn pr" onclick="openOrc()">+ Novo</button></div>`;
-  const tbl=`<div class="desktop-only"><table><thead><tr><th>Projeto</th><th>Cliente</th><th>Mat.</th><th>Desc.</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+  if(!list.length)return`<div class="empty"><div class="ei"></div><p>Nenhum orcamento</p><button class="btn pr" onclick="openOrc()">+ Novo</button></div>`;
+  const tbl=`<div class="desktop-only"><table><thead><tr><th>Projeto</th><th>Cliente</th><th>Mat.</th><th>Desc.</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Acoes</th></tr></thead><tbody>
   ${list.map(o=>{const cl=S.clientes.find(c=>c.id===o.clienteId);return`<tr>
     <td><strong>${o.nome}</strong></td>
-    <td style="cursor:pointer;color:var(--ac)" onclick="${cl?`nav('cdet','${cl.id}')`:'void(0)'}">${cl?cl.nome:'—'}</td>
+    <td style="cursor:pointer;color:var(--ac)" onclick="${cl?`nav('cdet','${cl.id}')`:'void(0)'}">${cl?cl.nome:'-'}</td>
     <td>${bdg('gy',o.material||'PLA')}</td>
-    <td>${o.desconto?bdg('gn','-'+o.desconto+'%'):'—'}</td>
+    <td>${o.desconto?bdg('gn','-'+o.desconto+'%'):'-'}</td>
     <td>${bPg(o.pagamento,o.saldoDevedor)}</td>
     <td style="font-family:'DM Mono',monospace;font-weight:500;color:var(--ac)">${R(o.total)}</td>
     <td>${bSt(o.status)}</td>
     <td><div style="display:flex;gap:4px">
-      ${(o.pagamento==='fiado'||o.pagamento==='parcial')&&o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')">💰</button>`:''}
-      <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')">📄</button>
-      <button class="btn sm" onclick="openOrcEdit('${o.id}')">✏</button>
-      <button class="btn sm dg" onclick="confDel('orc','${o.id}')">✕</button>
+      ${(o.pagamento==='fiado'||o.pagamento==='parcial')&&o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')"></button>`:''}
+      <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')"></button>
+      <button class="btn sm" onclick="openOrcEdit('${o.id}')"></button>
+      <button class="btn sm dg" onclick="confDel('orc','${o.id}')">X</button>
     </div></td></tr>`;}).join('')}</tbody></table></div>`;
   const mob=`<div class="mobile-cards" style="padding:10px">${list.map(o=>{const cl=S.clientes.find(c=>c.id===o.clienteId);return`<div class="mcard">
     <div class="mcard-row"><div class="mcard-body">
       <div class="mcard-title">${o.nome}</div>
-      <div class="mcard-sub">${cl?cl.nome:'Sem cliente'} · ${o.material} · ${dt(o.criado)}</div>
+      <div class="mcard-sub">${cl?cl.nome:'Sem cliente'}  ${o.material}  ${dt(o.criado)}</div>
       <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">${bSt(o.status)} ${bPg(o.pagamento,o.saldoDevedor)}</div>
     </div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
       <div class="mcard-val">${R(o.total)}</div>
       <div style="display:flex;gap:4px">
-        ${(o.pagamento==='fiado'||o.pagamento==='parcial')&&o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')">💰</button>`:''}
-        <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')">📄</button>
-        <button class="btn sm" onclick="openOrcEdit('${o.id}')">✏</button>
-        <button class="btn sm dg" onclick="confDel('orc','${o.id}')">✕</button>
+        ${(o.pagamento==='fiado'||o.pagamento==='parcial')&&o.saldoDevedor>0?`<button class="btn sm wn" onclick="openPagOrc('${o.id}')"></button>`:''}
+        <button class="btn sm pr" onclick="gerarPDF('orc','${o.id}')"></button>
+        <button class="btn sm" onclick="openOrcEdit('${o.id}')"></button>
+        <button class="btn sm dg" onclick="confDel('orc','${o.id}')">X</button>
       </div></div></div></div>`;}).join('')}</div>`;
   return tbl+mob;
 }
@@ -885,31 +885,31 @@ function rRecibos(){
   return`<div class="tw">
     <div class="th2"><span class="ttl">Recibos (${S.recibos.length})</span></div>
     ${list.length?`
-    <div class="desktop-only"><table><thead><tr><th>Número</th><th>Cliente</th><th>Descrição</th><th>Forma</th><th>Valor</th><th>Data</th><th>Ações</th></tr></thead><tbody>
+    <div class="desktop-only"><table><thead><tr><th>Numero</th><th>Cliente</th><th>Descricao</th><th>Forma</th><th>Valor</th><th>Data</th><th>Acoes</th></tr></thead><tbody>
     ${list.map(r=>{const cl=S.clientes.find(c=>c.id===r.clienteId);return`<tr>
       <td><strong>#${r.numero}</strong></td>
-      <td style="cursor:pointer;color:var(--ac)" onclick="${cl?`nav('cdet','${cl.id}')`:'void(0)'}">${cl?cl.nome:'—'}</td>
+      <td style="cursor:pointer;color:var(--ac)" onclick="${cl?`nav('cdet','${cl.id}')`:'void(0)'}">${cl?cl.nome:'-'}</td>
       <td>${r.descricao}</td><td>${bdg('gn',r.forma)}</td>
       <td style="font-family:'DM Mono',monospace;font-weight:500;color:var(--ok)">${R(r.valor)}</td>
       <td style="color:var(--mt)">${dt(r.ts)}</td>
       <td><div style="display:flex;gap:4px">
-        <button class="btn sm pr" onclick="gerarPDF('rec','${r.id}')">📄 PDF</button>
-        <button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppRecibo('${r.id}')">📱</button>
-        <button class="btn sm dg" onclick="confDel('rec','${r.id}')">✕</button>
+        <button class="btn sm pr" onclick="gerarPDF('rec','${r.id}')"> PDF</button>
+        <button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppRecibo('${r.id}')"></button>
+        <button class="btn sm dg" onclick="confDel('rec','${r.id}')">X</button>
       </div></td></tr>`;}).join('')}</tbody></table></div>
     <div class="mobile-cards" style="padding:10px">${list.map(r=>{const cl=S.clientes.find(c=>c.id===r.clienteId);return`<div class="mcard">
       <div class="mcard-row"><div class="mcard-body">
         <div class="mcard-title">Recibo #${r.numero}</div>
-        <div class="mcard-sub">${cl?cl.nome:'—'} · ${r.forma} · ${dt(r.ts)}</div>
+        <div class="mcard-sub">${cl?cl.nome:'-'}  ${r.forma}  ${dt(r.ts)}</div>
         <div class="mcard-sub" style="margin-top:2px">${r.descricao}</div>
       </div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div style="font-family:'DM Mono',monospace;font-weight:600;color:var(--ok);font-size:15px">${R(r.valor)}</div>
         <div style="display:flex;gap:4px">
-          <button class="btn sm pr" onclick="gerarPDF('rec','${r.id}')">📄</button>
-          <button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppRecibo('${r.id}')">📱</button>
-          <button class="btn sm dg" onclick="confDel('rec','${r.id}')">✕</button>
+          <button class="btn sm pr" onclick="gerarPDF('rec','${r.id}')"></button>
+          <button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppRecibo('${r.id}')"></button>
+          <button class="btn sm dg" onclick="confDel('rec','${r.id}')">X</button>
         </div></div></div></div>`;}).join('')}</div>`
-    :`<div class="empty"><div class="ei">🧾</div><p>Nenhum recibo gerado</p><button class="btn pr" onclick="openRecibo()">+ Criar recibo</button></div>`}
+    :`<div class="empty"><div class="ei"></div><p>Nenhum recibo gerado</p><button class="btn pr" onclick="openRecibo()">+ Criar recibo</button></div>`}
   </div>`;
 }
 
@@ -921,8 +921,8 @@ function rFiado(){
   const pags=[...S.pagamentos].sort((a,b)=>b.ts-a.ts).slice(0,8);
   return`<div class="sc">
     <div class="scard" style="${total>0?'border-color:#f0d080;background:var(--wnb)':''}"><div class="sl">Em aberto</div><div class="sv" style="font-size:17px;${total>0?'color:var(--wn)':''}">${R(total)}</div><div class="ss">${comF.length} cliente(s)</div></div>
-    <div class="scard"><div class="sl">Recebido</div><div class="sv" style="font-size:17px">${R(S.pagamentos.reduce((s,p)=>s+p.valor,0))}</div><div class="ss">histórico total</div></div>
-    <div class="scard"><div class="sl">Lançamentos</div><div class="sv">${S.lancamentos.length}</div><div class="ss">registros</div></div>
+    <div class="scard"><div class="sl">Recebido</div><div class="sv" style="font-size:17px">${R(S.pagamentos.reduce((s,p)=>s+p.valor,0))}</div><div class="ss">historico total</div></div>
+    <div class="scard"><div class="sl">Lancamentos</div><div class="sv">${S.lancamentos.length}</div><div class="ss">registros</div></div>
     <div class="scard"><div class="sl">Em dia</div><div class="sv">${S.clientes.filter(c=>fiadoSaldo(c.id)===0).length}</div><div class="ss">clientes</div></div>
   </div>
   <div style="font-size:13px;font-weight:600;margin-bottom:10px">Clientes com saldo em aberto</div>
@@ -936,20 +936,20 @@ function rFiado(){
       </div>
       ${lim>0?`<div class="pb"><div class="pf" style="width:${pct}%;background:${pct>=90?'var(--dg)':'var(--wn)'}"></div></div><div style="font-size:10px;color:var(--mt);margin-top:3px">${R(saldo)} / ${R(lim)} (${Math.round(pct)}%)</div>`:''}
       <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn sm wn" onclick="openPagCli('${c.id}')">💰 Receber</button>
-        <button class="btn sm pr" onclick="openRecibo('${c.id}')">🧾 Recibo</button>
-        <button class="btn sm" onclick="openLanc('${c.id}')">+ Lançamento</button>
+        <button class="btn sm wn" onclick="openPagCli('${c.id}')"> Receber</button>
+        <button class="btn sm pr" onclick="openRecibo('${c.id}')"> Recibo</button>
+        <button class="btn sm" onclick="openLanc('${c.id}')">+ Lancamento</button>
         <button class="btn sm" onclick="nav('cdet','${c.id}')">Ver detalhes</button>
-        ${c.tel?`<button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppCob('${c.id}')">📱 Cobrar</button>`:''}
+        ${c.tel?`<button class="btn sm ok" style="background:#25D366;border-color:#25D366;color:#fff" onclick="wppCob('${c.id}')"> Cobrar</button>`:''}
       </div></div>`;}).join(''):`<div class="empty" style="padding:35px 0"><p>Nenhum cliente com saldo em aberto!</p></div>`}
-  ${pags.length?`<div style="font-size:13px;font-weight:600;margin:16px 0 10px">Últimos pagamentos</div>
+  ${pags.length?`<div style="font-size:13px;font-weight:600;margin:16px 0 10px">Ultimos pagamentos</div>
   <div class="tw"><table><thead><tr><th>Cliente</th><th>Valor</th><th>Forma</th><th>Data</th></tr></thead><tbody>
   ${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`<tr>
-    <td>${cl?cl.nome:'—'}</td>
+    <td>${cl?cl.nome:'-'}</td>
     <td style="font-family:'DM Mono',monospace;color:var(--ok);font-weight:500">${R(p.valor)}</td>
     <td>${bdg('gn',p.forma)}</td>
     <td style="color:var(--mt)">${dt(p.ts)}</td></tr>`;}).join('')}</tbody></table>
-  <div class="mobile-cards" style="padding:10px">${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`<div class="mcard"><div class="mcard-row"><div class="mcard-body"><div class="mcard-title">${cl?cl.nome:'—'}</div><div class="mcard-sub">${p.forma} · ${dt(p.ts)}</div></div><div style="font-family:'DM Mono',monospace;font-weight:600;color:var(--ok)">${R(p.valor)}</div></div></div>`;}).join('')}</div>
+  <div class="mobile-cards" style="padding:10px">${pags.map(p=>{const cl=S.clientes.find(c=>c.id===p.clienteId);return`<div class="mcard"><div class="mcard-row"><div class="mcard-body"><div class="mcard-title">${cl?cl.nome:'-'}</div><div class="mcard-sub">${p.forma}  ${dt(p.ts)}</div></div><div style="font-family:'DM Mono',monospace;font-weight:600;color:var(--ok)">${R(p.valor)}</div></div></div>`;}).join('')}</div>
   </div>`:''}`;
 }
 
@@ -967,14 +967,14 @@ function openCli(id){
   openM('m-cli');
 }
 function saveCliente(){
-  const nome=vv('cn');if(!nome)return toast('⚠ Nome é obrigatório');
+  const nome=vv('cn');if(!nome)return toast('(!) Nome e obrigatorio');
   const obj={id:S.editC||uid(),nome,empresa:vv('ce'),doc:vv('cd'),tel:vv('ct'),email:vv('cem'),
     cidade:vv('cc'),endereco:vv('cend'),nascimento:document.getElementById('cnas').value,
     instagram:vv('cig'),facebook:vv('cfb'),tiktok:vv('ctt'),site:vv('csi'),obs:vv('co'),
     desconto:gn('cdc'),fiadoLimite:gn('cfl'),
     criado:S.editC?(S.clientes.find(c=>c.id===S.editC)?.criado||Date.now()):Date.now()};
   S.editC?S.clientes=S.clientes.map(c=>c.id===S.editC?obj:c):S.clientes.push(obj);
-  closeM('m-cli');saveDrive();toast(S.editC?'✓ Cliente atualizado':'✓ Cliente cadastrado!');renderPage();
+  closeM('m-cli');saveDrive();toast(S.editC?'OK Cliente atualizado':'OK Cliente cadastrado!');renderPage();
 }
 
 // ---
@@ -988,7 +988,7 @@ function popOrc(cid){
 function onCli(){const c=S.clientes.find(x=>x.id===document.getElementById('oc').value);if(c?.desconto)document.getElementById('odc').value=c.desconto;calcM()}
 function onPg(){document.getElementById('ent-row').style.display=document.getElementById('opg').value==='parcial'?'flex':'none';calcM()}
 function openOrc(cid){
-  S.editO=null;document.getElementById('mo-t').textContent='Novo orçamento';
+  S.editO=null;document.getElementById('mo-t').textContent='Novo orcamento';
   popOrc(cid);
   const c=cid?S.clientes.find(x=>x.id===cid):null;
   ['on','oob'].forEach(i=>document.getElementById(i).value='');
@@ -1003,7 +1003,7 @@ function openOrc(cid){
 }
 function openOrcEdit(id){
   const o=S.orcamentos.find(x=>x.id===id);if(!o)return;
-  S.editO=id;document.getElementById('mo-t').textContent='Editar orçamento';
+  S.editO=id;document.getElementById('mo-t').textContent='Editar orcamento';
   popOrc(o.clienteId);
   document.getElementById('on').value=o.nome||'';document.getElementById('om').value=o.matCusto||defMat().preco;
   document.getElementById('ope').value=o.peso||50;document.getElementById('ot').value=o.tempo||4;
@@ -1031,19 +1031,19 @@ function calcM(){
   const saldo=pg==='fiado'?total:pg==='parcial'?Math.max(0,total-ent):0;
   const el=document.getElementById('mcalc');if(!el)return{unit,total,saldo,disc,ent,mat,peso,t,qty,lh,lr,ex,fr,mg:mg*100,tx:tx*100,dc:dc*100,pg,pid};
   el.innerHTML=`<div class="crow"><span style="color:var(--mt)">Material</span><span>${R(bm)}</span></div>
-    <div class="crow"><span style="color:var(--mt)">Máquina${pr?' ('+pr.nome+')':''}</span><span>${R(bmq)}</span></div>
+    <div class="crow"><span style="color:var(--mt)">Maquina${pr?' ('+pr.nome+')':''}</span><span>${R(bmq)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Energia</span><span>${R(ben)}</span></div>
-    <div class="crow"><span style="color:var(--mt)">Mão de obra</span><span>${R(bl)}</span></div>
+    <div class="crow"><span style="color:var(--mt)">Mao de obra</span><span>${R(bl)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Extras+frete</span><span>${R(ex+fr)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Lucro (${Math.round(mg*100)}%)</span><span>${R(pf)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Impostos (${Math.round(tx*100)}%)</span><span>${R(taxes)}</span></div>
-    ${dc>0?`<div class="crow" style="color:var(--ok)"><span>Desconto (${Math.round(dc*100)}%)</span><span>−${R(disc)}</span></div>`:''}
+    ${dc>0?`<div class="crow" style="color:var(--ok)"><span>Desconto (${Math.round(dc*100)}%)</span><span>${R(disc)}</span></div>`:''}
     <div class="crow tot"><span>Total (${qty}x)</span><span>${R(total)}</span></div>
     ${saldo>0?`<div class="crow" style="color:var(--wn)"><span>Saldo devedor</span><span>${R(saldo)}</span></div>`:''}`;
   return{unit,total,saldo,disc,ent,mat,peso,t,qty,lh,lr,ex,fr,mg:mg*100,tx:tx*100,dc:dc*100,pg,pid};
 }
 function saveOrc(){
-  const nome=vv('on');if(!nome)return toast('⚠ Nome da peça é obrigatório');
+  const nome=vv('on');if(!nome)return toast('(!) Nome da peca e obrigatorio');
   const vals=calcM();const mc=gn('om');const pg=document.getElementById('opg').value;
   const obj={id:S.editO||uid(),nome,clienteId:document.getElementById('oc').value,
     matCusto:mc,material:matName(mc),impressoraId:document.getElementById('opr').value||null,
@@ -1053,8 +1053,8 @@ function saveOrc(){
     saldoDevedor:vals.saldo,obs:vv('oob'),total:vals.total,unitPrice:vals.unit,
     criado:S.editO?(S.orcamentos.find(o=>o.id===S.editO)?.criado||Date.now()):Date.now(),atualizado:Date.now()};
   S.editO?S.orcamentos=S.orcamentos.map(o=>o.id===S.editO?obj:o):S.orcamentos.push(obj);
-  closeM('m-orc');saveDrive();toast(S.editO?'✓ Atualizado!':'✓ Orçamento salvo!');
-  setTimeout(()=>{if(confirm('Gerar PDF do orçamento?'))gerarPDF('orc',obj.id)},300);
+  closeM('m-orc');saveDrive();toast(S.editO?'OK Atualizado!':'OK Orcamento salvo!');
+  setTimeout(()=>{if(confirm('Gerar PDF do orcamento?'))gerarPDF('orc',obj.id)},300);
   renderPage();
 }
 
@@ -1095,8 +1095,8 @@ function updateRecFormas(){
 function saveRecibo(){
   const cid=document.getElementById('rc').value;
   const desc=vv('rd');const val=parseFloat(document.getElementById('rv').value);
-  if(!desc)return toast('⚠ Informe a descrição do serviço');
-  if(!val||val<=0)return toast('⚠ Informe um valor válido');
+  if(!desc)return toast('(!) Informe a descricao do servico');
+  if(!val||val<=0)return toast('(!) Informe um valor valido');
   const numStr=vv('rnum')||('#'+String(S._recNum).padStart(4,'0'));
   // collect selected formas
   const checks=document.querySelectorAll('#rec-formas-check input[data-fpid]:checked');
@@ -1111,7 +1111,7 @@ function saveRecibo(){
     numero:numStr.replace('#',''),obs:vv('rob'),
     ts:new Date(document.getElementById('rdt').value+'T12:00:00').getTime()||Date.now()};
   S.recibos.push(rec);S._recNum++;
-  closeM('m-rec');saveDrive();toast('✓ Recibo salvo!');
+  closeM('m-rec');saveDrive();toast('OK Recibo salvo!');
   setTimeout(()=>gerarPDF('rec',rec.id),400);
   renderPage();
 }
@@ -1128,11 +1128,11 @@ function openLanc(cid){
 }
 function saveLanc(){
   const cid=document.getElementById('fa-c').value,desc=vv('fa-d'),val=parseFloat(document.getElementById('fa-v').value);
-  if(!cid)return toast('⚠ Selecione um cliente');
-  if(!desc)return toast('⚠ Informe a descrição');
-  if(!val||val<=0)return toast('⚠ Valor inválido');
+  if(!cid)return toast('(!) Selecione um cliente');
+  if(!desc)return toast('(!) Informe a descricao');
+  if(!val||val<=0)return toast('(!) Valor invalido');
   S.lancamentos.push({id:uid(),clienteId:cid,desc,valor:val,tipo:document.getElementById('fa-t').value,venc:document.getElementById('fa-vn').value,obs:vv('fa-o'),ts:Date.now()});
-  closeM('m-fiad');saveDrive();toast('✓ Lançamento adicionado!');renderPage();
+  closeM('m-fiad');saveDrive();toast('OK Lancamento adicionado!');renderPage();
 }
 
 // ---
@@ -1149,13 +1149,13 @@ function openPagOrc(orcId){
   const o=S.orcamentos.find(x=>x.id===orcId);if(!o)return;
   const cl=S.clientes.find(c=>c.id===o.clienteId);
   S._pagCid=o.clienteId;S._pagOrcId=orcId;
-  document.getElementById('mp-i').innerHTML=`<strong>${o.nome}</strong><br>Cliente: ${cl?.nome||'—'}<br>Saldo: <strong style="color:var(--wn)">${R(o.saldoDevedor)}</strong>`;
+  document.getElementById('mp-i').innerHTML=`<strong>${o.nome}</strong><br>Cliente: ${cl?.nome||'-'}<br>Saldo: <strong style="color:var(--wn)">${R(o.saldoDevedor)}</strong>`;
   document.getElementById('pv').value=(o.saldoDevedor||0).toFixed(2);
   document.getElementById('pob').value='';document.getElementById('pdt').value=new Date().toISOString().slice(0,10);
   openM('m-pag');
 }
 function savePag(){
-  const valor=parseFloat(document.getElementById('pv').value);if(!valor||valor<=0)return toast('⚠ Valor inválido');
+  const valor=parseFloat(document.getElementById('pv').value);if(!valor||valor<=0)return toast('(!) Valor invalido');
   const forma=document.getElementById('pfp').value,obs=vv('pob');
   const pdt=document.getElementById('pdt').value;
   if(S._pagOrcId){
@@ -1166,11 +1166,11 @@ function savePag(){
     S.lancamentos.filter(l=>l.clienteId===S._pagCid&&l.tipo==='debito').sort((a,b)=>a.ts-b.ts).forEach(l=>{if(rest<=0)return;const ab=Math.min(l.valor,rest);l.valor=Math.max(0,l.valor-ab);rest-=ab});
   }
   S.pagamentos.push({id:uid(),clienteId:S._pagCid,orcId:S._pagOrcId,valor,forma,obs,ts:pdt?new Date(pdt+'T12:00:00').getTime():Date.now()});
-  closeM('m-pag');saveDrive();toast(`✓ Pagamento de ${R(valor)} registrado!`);renderPage();
+  closeM('m-pag');saveDrive();toast(`OK Pagamento de ${R(valor)} registrado!`);renderPage();
 }
 
 // ---
-// PDF - ORÇAMENTO
+// PDF - ORCAMENTO
 // ---
 function gerarPDF(tipo,id){
   if(!window.jspdf){toast('Aguarde o carregamento...');return}
@@ -1299,7 +1299,7 @@ function gerarPDFOrc(orcId){
     if(ct){doc.setFontSize(8);doc.setTextColor(100,116,139);doc.text(ct,pad+3,y+(cl.empresa?24:18))}
     y+=(cl.empresa||cl.email?31:24);
   }
-  // nome peça
+  // nome peca
   doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text(o.nome,pad,y+7);
   doc.setFillColor(30,58,138);doc.rect(pad,y+9,W-pad*2,.5,'F');y+=16;
   // detalhes
@@ -1318,12 +1318,12 @@ function gerarPDFOrc(orcId){
   // tabela custos
   doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,7,'F');
   doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);
-  doc.text('DESCRIÇÃO',pad+3,y+5);doc.text('VALOR',W-pad-3,y+5,{align:'right'});y+=9;
+  doc.text('DESCRICAO',pad+3,y+5);doc.text('VALOR',W-pad-3,y+5,{align:'right'});y+=9;
   const rows=[];
-  if(PM.material!==false)rows.push(['Material ('+o.material+' · '+o.peso+'g)',R(o.matCusto*o.peso)]);
-  rows.push(['Máquina'+(pr?' ('+pr.nome+')':''),R((pr?pr.custoPorHora:S.cfg.maqCusto)*o.tempo)]);
-  rows.push(['Energia elétrica',R(((pr?pr.potencia:S.cfg.maqPotencia)/1000)*o.tempo*S.cfg.energia)]);
-  if(PM.labor!==false)rows.push(['Mão de obra ('+o.laborH+'h)',R(o.laborH*o.laborR)]);
+  if(PM.material!==false)rows.push(['Material ('+o.material+'  '+o.peso+'g)',R(o.matCusto*o.peso)]);
+  rows.push(['Maquina'+(pr?' ('+pr.nome+')':''),R((pr?pr.custoPorHora:S.cfg.maqCusto)*o.tempo)]);
+  rows.push(['Energia eletrica',R(((pr?pr.potencia:S.cfg.maqPotencia)/1000)*o.tempo*S.cfg.energia)]);
+  if(PM.labor!==false)rows.push(['Mao de obra ('+o.laborH+'h)',R(o.laborH*o.laborR)]);
   if(PM.extras!==false&&o.extra)rows.push(['Acabamento / extras',R(o.extra)]);
   if(o.frete)rows.push(['Frete',R(o.frete)]);
   rows.forEach((row,i)=>{
@@ -1333,34 +1333,34 @@ function gerarPDFOrc(orcId){
   doc.setFillColor(200,210,230);doc.rect(pad,y,W-pad*2,.5,'F');y+=4;
   if(PM.margem!==false){doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text('Margem ('+o.margem+'%)',pad+3,y+4);doc.text(R(o.unitPrice*(o.margem/100)/(1+(o.margem/100))),W-pad-3,y+4,{align:'right'});y+=7}
   if(PM.imposto!==false){doc.setFontSize(8.5);doc.setTextColor(100,116,139);doc.text('Impostos ('+o.tax+'%)',pad+3,y+4);doc.text(R(o.total*(o.tax/100)),W-pad-3,y+4,{align:'right'});y+=7}
-  if(o.desconto&&PM.desconto!==false){doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(22,101,52);doc.text('Desconto ('+o.desconto+'%)',pad+3,y+4);doc.text('−'+R(o.unitPrice*o.qty*(o.desconto/100)/(1-(o.desconto/100))),W-pad-3,y+4,{align:'right'});y+=7;doc.setTextColor(15,23,42)}
+  if(o.desconto&&PM.desconto!==false){doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(22,101,52);doc.text('Desconto ('+o.desconto+'%)',pad+3,y+4);doc.text(''+R(o.unitPrice*o.qty*(o.desconto/100)/(1-(o.desconto/100))),W-pad-3,y+4,{align:'right'});y+=7;doc.setTextColor(15,23,42)}
   // total
   y+=2;doc.setFillColor(30,58,138);doc.rect(pad,y,W-pad*2,11,'F');
   doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
   doc.text('TOTAL',pad+4,y+7.5);doc.text(R(o.total),W-pad-4,y+7.5,{align:'right'});y+=15;
-  if(PM.unitario!==false&&o.qty>1){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text(o.qty+'x '+R(o.unitPrice)+'/peça',pad,y);y+=6}
+  if(PM.unitario!==false&&o.qty>1){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text(o.qty+'x '+R(o.unitPrice)+'/peca',pad,y);y+=6}
   // pagamento status
-  if(o.pagamento==='fiado'){doc.setFillColor(255,247,237);doc.rect(pad,y,W-pad*2,9,'F');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(154,52,18);doc.text('⚠ Pagamento a prazo — Saldo em aberto: '+R(o.saldoDevedor||o.total),pad+3,y+6);y+=13}
+  if(o.pagamento==='fiado'){doc.setFillColor(255,247,237);doc.rect(pad,y,W-pad*2,9,'F');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(154,52,18);doc.text('(!) Pagamento a prazo - Saldo em aberto: '+R(o.saldoDevedor||o.total),pad+3,y+6);y+=13}
   else if(o.pagamento==='parcial'){doc.setFillColor(255,247,237);doc.rect(pad,y,W-pad*2,9,'F');doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(154,52,18);doc.text('Entrada: '+R(o.entrada||0)+'   Saldo restante: '+R(o.saldoDevedor||0),pad+3,y+6);y+=13}
   // formas de pagamento
   const pgL=[];
   if(PP.pix!==false&&cfg.pix)pgL.push('Pix: '+cfg.pix);
-  if(PP.cartao!==false)pgL.push('Cartão débito/crédito');
+  if(PP.cartao!==false)pgL.push('Cartao debito/credito');
   if(PP.dinheiro!==false)pgL.push('Dinheiro');
   if(PP.link!==false&&cfg.linkPagamento)pgL.push('Link: '+cfg.linkPagamento);
   if(pgL.length){y+=2;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text('FORMAS DE PAGAMENTO',pad,y);y+=5;
-    pgL.forEach(p=>{doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);doc.text('• '+p,pad+2,y);y+=5})}
+    pgL.forEach(p=>{doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);doc.text('- '+p,pad+2,y);y+=5})}
   // QR Code
   if(PP.qrcode!==false&&cfg.qrcodeBase64){try{doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);y+=3;doc.text('QR CODE PIX',W-pad-30,y);doc.addImage(cfg.qrcodeBase64,'PNG',W-pad-30,y+2,28,28)}catch(e){}}
   // obs
-  if(o.obs){y+=4;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);doc.text('OBSERVAÇÕES',pad,y);y+=5;
+  if(o.obs){y+=4;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);doc.text('OBSERVACOES',pad,y);y+=5;
     doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);
     const ol=doc.splitTextToSize(o.obs,W-pad*2);doc.text(ol,pad,y)}
   pdfFooterTemplate(doc,W,H,'orc');
   S._pdf=doc;S._pdfOrcId=orcId;S._pdfMode='orc';
   const blob=doc.output('blob');
   document.getElementById('pdf-fr').src=URL.createObjectURL(blob);
-  document.getElementById('pdf-t').textContent='Orçamento — '+o.nome;
+  document.getElementById('pdf-t').textContent='Orcamento - '+o.nome;
   openM('m-pdf');
 }
 
@@ -1410,7 +1410,7 @@ function gerarPDFRec(recId){
   doc.text(R(rec.valor),W/2,y+13,{align:'center'});y+=22;
   // ref texto
   const refTxt=(cfg.reciboTextoRef||'Referente a: {descricao}')
-    .replace('{descricao}',rec.descricao).replace('{cliente}',cl?cl.nome:'—').replace('{emitente}',emitente);
+    .replace('{descricao}',rec.descricao).replace('{cliente}',cl?cl.nome:'-').replace('{emitente}',emitente);
   doc.setFillColor(241,245,249);doc.rect(pad,y,W-pad*2,11,'F');
   doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);
   const rL=doc.splitTextToSize(refTxt,W-pad*2-8);doc.text(rL,pad+4,y+7);y+=14+Math.max(0,(rL.length-1)*5);
@@ -1421,7 +1421,7 @@ function gerarPDFRec(recId){
     ...(cl?.doc?[['CPF / CNPJ',cl.doc]]:[]),
     ...(cl?.tel?[['Telefone / WhatsApp',cl.tel]]:[]),
     ...(cfg.pix?[['Chave Pix',cfg.pix]]:[]),
-    ...(rec.obs?[['Observações',rec.obs]]:[]),
+    ...(rec.obs?[['Observacoes',rec.obs]]:[]),
   ];
   linhas.forEach((l,i)=>{
     if(i%2===0){doc.setFillColor(250,251,252);doc.rect(pad,y,W-pad*2,10,'F')}
@@ -1434,7 +1434,7 @@ function gerarPDFRec(recId){
   const fps=rec.formasAceitas&&rec.formasAceitas.length?rec.formasAceitas:(cfg.formasPagamento||[]).filter(f=>f.ativo);
   if(fps.length){
     doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text('FORMAS DE PAGAMENTO ACEITAS',pad,y);y+=5;
-    const fT=fps.map(f=>f.nome+(f.detalhe?' ('+f.detalhe+')':'')).join('   •   ');
+    const fT=fps.map(f=>f.nome+(f.detalhe?' ('+f.detalhe+')':'')).join('   -   ');
     doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(15,23,42);
     const fL=doc.splitTextToSize(fT,W-pad*2);doc.text(fL,pad,y);y+=fL.length*5+4;
   }
@@ -1442,7 +1442,7 @@ function gerarPDFRec(recId){
   if(cfg.qrcodeBase64&&cfg.pdfPagamentos?.qrcode!==false){
     try{doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(30,58,138);doc.text('QR CODE PIX',W-pad-32,y-10);doc.addImage(cfg.qrcodeBase64,'PNG',W-pad-32,y-8,30,30);}catch(e){}
   }
-  if(cfg.linkPagamento){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(30,58,138);doc.text('🔗 '+cfg.linkPagamento,pad,y);y+=6}
+  if(cfg.linkPagamento){doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(30,58,138);doc.text(' '+cfg.linkPagamento,pad,y);y+=6}
   y+=10;
   // assinatura
   doc.setDrawColor(180,190,200);
@@ -1470,7 +1470,7 @@ function dlPDF(){
   const id=S._pdfOrcId;
   const nome=S._pdfMode==='rec'?(S.recibos.find(r=>r.id===id)?.numero||id):(S.orcamentos.find(o=>o.id===id)?.nome||id);
   S._pdf.save(`${prefix}_${String(nome).replace(/\s+/g,'_')}.pdf`);
-  toast('✓ PDF baixado!');
+  toast('OK PDF baixado!');
 }
 function wppSend(){
   if(!S._pdf||!S._pdfOrcId)return;
@@ -1480,14 +1480,14 @@ function wppSend(){
     const o=S.orcamentos.find(x=>x.id===S._pdfOrcId);
     const cl=S.clientes.find(c=>c.id===o?.clienteId);
     tel=cl?.tel?.replace(/\D/g,'')||'';
-    const pix=S.cfg.pix?`\n💳 Pix: *${S.cfg.pix}*`:'';
-    const link=S.cfg.linkPagamento?`\n🔗 ${S.cfg.linkPagamento}`:'';
-    msg=`Olá${cl?', '+cl.nome.split(' ')[0]:''}! 😊\n\n📦 *${o.nome}*\n• ${o.material} · ${o.peso}g · ${o.qty}x\n${o.desconto?'• Desconto: '+o.desconto+'%\n':''}\n💰 Por peça: ${R(o.unitPrice)}\n📋 *Total: ${R(o.total)}*\n${o.pagamento==='fiado'?'💳 Pagamento a prazo\n':''}\n${S.cfg.assinatura||''}${pix}${link}\n\n${S.cfg.nomeLoja||''}${S.cfg.whatsapp?' · '+S.cfg.whatsapp:''}`;
+    const pix=S.cfg.pix?`\n Pix: *${S.cfg.pix}*`:'';
+    const link=S.cfg.linkPagamento?`\n ${S.cfg.linkPagamento}`:'';
+    msg=`Ola${cl?', '+cl.nome.split(' ')[0]:''}! \n\n *${o.nome}*\n- ${o.material}  ${o.peso}g  ${o.qty}x\n${o.desconto?'- Desconto: '+o.desconto+'%\n':''}\n Por peca: ${R(o.unitPrice)}\n *Total: ${R(o.total)}*\n${o.pagamento==='fiado'?' Pagamento a prazo\n':''}\n${S.cfg.assinatura||''}${pix}${link}\n\n${S.cfg.nomeLoja||''}${S.cfg.whatsapp?'  '+S.cfg.whatsapp:''}`;
   } else {
     const rec=S.recibos.find(x=>x.id===S._pdfOrcId);
     const cl=S.clientes.find(c=>c.id===rec?.clienteId);
     tel=cl?.tel?.replace(/\D/g,'')||'';
-    msg=`Olá${cl?', '+cl.nome.split(' ')[0]:''}! 😊\n\nSegue o recibo de pagamento:\n\n🧾 Recibo #${rec.numero}\n💰 Valor: *${R(rec.valor)}*\n📋 ${rec.descricao}\n💳 ${rec.forma}\n📅 ${dt(rec.ts)}\n\n${S.cfg.assinatura||''}\n${S.cfg.nomeLoja||''}${S.cfg.whatsapp?' · '+S.cfg.whatsapp:''}`;
+    msg=`Ola${cl?', '+cl.nome.split(' ')[0]:''}! \n\nSegue o recibo de pagamento:\n\n Recibo #${rec.numero}\n Valor: *${R(rec.valor)}*\n ${rec.descricao}\n ${rec.forma}\n ${dt(rec.ts)}\n\n${S.cfg.assinatura||''}\n${S.cfg.nomeLoja||''}${S.cfg.whatsapp?'  '+S.cfg.whatsapp:''}`;
   }
   setTimeout(()=>window.open(tel?`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank'),600);
 }
@@ -1498,15 +1498,15 @@ function wppRecibo(id){
 function wppAniv(cid){
   const c=S.clientes.find(x=>x.id===cid);if(!c)return;
   const tel=c.tel?.replace(/\D/g,'');
-  const msg=encodeURIComponent(`Olá, ${c.nome.split(' ')[0]}! 🎉🎂\n\nPassando para desejar um feliz aniversário! Que seja um dia incrível! 🥳\n\n${S.cfg.nomeLoja||'3D Cêntrico'}`);
+  const msg=encodeURIComponent(`Ola, ${c.nome.split(' ')[0]}! \n\nPassando para desejar um feliz aniversario! Que seja um dia incrivel! \n\n${S.cfg.nomeLoja||'3D Centrico'}`);
   window.open(`https://wa.me/55${tel}?text=${msg}`,'_blank');
 }
 function wppCob(cid){
   const c=S.clientes.find(x=>x.id===cid);const saldo=fiadoSaldo(cid);
   const tel=c?.tel?.replace(/\D/g,'');const loja=S.cfg.nomeLoja||'nossa loja';
-  const pix=S.cfg.pix?`\n\n💳 Chave Pix: *${S.cfg.pix}*`:'';
-  const link=S.cfg.linkPagamento?`\n🔗 ${S.cfg.linkPagamento}`:'';
-  const msg=encodeURIComponent(`Olá, ${c?.nome?.split(' ')[0]||''}! 😊\n\nPassando para lembrar que há um saldo em aberto de *${R(saldo)}* em ${loja}.${pix}${link}\n\nQualquer dúvida, estou à disposição!`);
+  const pix=S.cfg.pix?`\n\n Chave Pix: *${S.cfg.pix}*`:'';
+  const link=S.cfg.linkPagamento?`\n ${S.cfg.linkPagamento}`:'';
+  const msg=encodeURIComponent(`Ola, ${c?.nome?.split(' ')[0]||''}! \n\nPassando para lembrar que ha um saldo em aberto de *${R(saldo)}* em ${loja}.${pix}${link}\n\nQualquer duvida, estou a disposicao!`);
   window.open(`https://wa.me/55${tel}?text=${msg}`,'_blank');
 }
 
@@ -1521,13 +1521,13 @@ function rCalc(){
       <div class="fg"><label>Material</label><select id="sm" oninput="calcSC()">${matOpts()}</select></div>
       <div class="fg"><label>Peso (g)</label><input id="sp" type="number" value="50" oninput="calcSC()"></div>
       <div class="fg"><label>Tempo (h)</label><input id="st" type="number" value="4" step="0.5" oninput="calcSC()"></div>
-      <div class="fg"><label>Máquina (R$/h)</label><input id="smq" type="number" value="${S.cfg.maqCusto}" step="0.5" oninput="calcSC()"></div>
+      <div class="fg"><label>Maquina (R$/h)</label><input id="smq" type="number" value="${S.cfg.maqCusto}" step="0.5" oninput="calcSC()"></div>
       <div class="fg"><label>Energia (R$/kWh)</label><input id="skw" type="number" value="${S.cfg.energia}" step="0.1" oninput="calcSC()"></div>
     </div>
   </div>
   <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px">
     <div class="g3">
-      <div class="fg"><label>Mão de obra (h)</label><input id="slh" type="number" value="0.5" step="0.25" oninput="calcSC()"></div>
+      <div class="fg"><label>Mao de obra (h)</label><input id="slh" type="number" value="0.5" step="0.25" oninput="calcSC()"></div>
       <div class="fg"><label>Taxa/hora (R$)</label><input id="slr" type="number" value="${S.cfg.laborRate}" step="5" oninput="calcSC()"></div>
       <div class="fg"><label>Acabamento (R$)</label><input id="sfn" type="number" value="0" oninput="calcSC()"></div>
       <div class="fg"><label>Frete (R$)</label><input id="sfr" type="number" value="0" oninput="calcSC()"></div>
@@ -1544,7 +1544,7 @@ function rCalc(){
   </div>
   <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:16px">
     <div id="scr"></div>
-    <button class="btn pr full" style="margin-top:12px" onclick="scToOrc()">Salvar como orçamento →</button>
+    <button class="btn pr full" style="margin-top:12px" onclick="scToOrc()">Salvar como orcamento ></button>
   </div></div>`;
 }
 function calcSC(){
@@ -1565,15 +1565,15 @@ function calcSC(){
     <div class="scard" style="border-color:var(--ac);background:var(--acb)"><div class="sl">Total</div><div class="sv" style="font-size:14px;color:var(--ac)">${R(total)}</div></div>
   </div><div class="csec">
     <div class="crow"><span style="color:var(--mt)">Material</span><span>${R(bm)}</span></div>
-    <div class="crow"><span style="color:var(--mt)">Máquina${pr?' ('+pr.nome+')':''}</span><span>${R(bmq)}</span></div>
+    <div class="crow"><span style="color:var(--mt)">Maquina${pr?' ('+pr.nome+')':''}</span><span>${R(bmq)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Energia</span><span>${R(ben)}</span></div>
-    <div class="crow"><span style="color:var(--mt)">Mão de obra</span><span>${R(bl)}</span></div>
+    <div class="crow"><span style="color:var(--mt)">Mao de obra</span><span>${R(bl)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Extras+frete</span><span>${R(fn+fr)}</span></div>
-    <div class="crow"><span style="color:var(--mt)">Contingência</span><span>${R(bfl)}</span></div>
+    <div class="crow"><span style="color:var(--mt)">Contingencia</span><span>${R(bfl)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Lucro (${Math.round(mg*100)}%)</span><span>${R(pf)}</span></div>
     <div class="crow"><span style="color:var(--mt)">Impostos (${Math.round(tx*100)}%)</span><span>${R(taxes)}</span></div>
-    ${dc>0?`<div class="crow" style="color:var(--ok)"><span>Desconto (${Math.round(dc*100)}%)</span><span>−${R(disc)}</span></div>`:''}
-    <div class="crow tot"><span>Total por peça</span><span>${R(unit)}</span></div>
+    ${dc>0?`<div class="crow" style="color:var(--ok)"><span>Desconto (${Math.round(dc*100)}%)</span><span>${R(disc)}</span></div>`:''}
+    <div class="crow tot"><span>Total por peca</span><span>${R(unit)}</span></div>
   </div>`;
 }
 function scToOrc(){
@@ -1596,50 +1596,50 @@ function rCfg(){
 
   <div class="cs"><div class="ch"><div class="ch-t"><h3>Impressoras</h3><p>Configure suas impressoras</p></div><button class="btn pr sm" onclick="openImp()">+ Nova</button></div>
   <div style="padding:0 16px">${S.impressoras.length?S.impressoras.map(p=>`<div class="lr">
-    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">${p.nome}</span>${bdg('gy',p.tipo||'FDM')}${p.padrao?bdg('bl','padrão'):''}</div>
-    <div style="font-size:11px;color:var(--mt)">${R(p.custoPorHora)}/h · ${p.potencia}W${p.volume?' · '+p.volume:''}</div></div>
-    <div style="display:flex;gap:4px">${!p.padrao?`<button class="btn sm" onclick="setImpPad('${p.id}')">☆</button>`:`<button class="btn sm" style="color:var(--ac)" disabled>★</button>`}
-    <button class="btn sm" onclick="openImp('${p.id}')">✏</button><button class="btn sm dg" onclick="delImp('${p.id}')">✕</button></div></div>`).join('')
+    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">${p.nome}</span>${bdg('gy',p.tipo||'FDM')}${p.padrao?bdg('bl','padrao'):''}</div>
+    <div style="font-size:11px;color:var(--mt)">${R(p.custoPorHora)}/h  ${p.potencia}W${p.volume?'  '+p.volume:''}</div></div>
+    <div style="display:flex;gap:4px">${!p.padrao?`<button class="btn sm" onclick="setImpPad('${p.id}')">*</button>`:`<button class="btn sm" style="color:var(--ac)" disabled>*</button>`}
+    <button class="btn sm" onclick="openImp('${p.id}')"></button><button class="btn sm dg" onclick="delImp('${p.id}')">X</button></div></div>`).join('')
   :`<div class="empty" style="padding:25px 0"><p>Nenhuma impressora cadastrada</p></div>`}</div></div>
 
   <div class="cs"><div class="ch"><div class="ch-t"><h3>Materiais</h3><p>Gerencie materiais e custos</p></div><button class="btn pr sm" onclick="openMat()">+ Novo</button></div>
   <div style="padding:0 16px">${S.materiais.map(m=>`<div class="lr">
-    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">${m.nome}</span>${m.padrao?bdg('bl','padrão'):''}</div>
+    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">${m.nome}</span>${m.padrao?bdg('bl','padrao'):''}</div>
     ${m.desc?`<div style="font-size:11px;color:var(--mt)">${m.desc}</div>`:''}</div>
     <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--ac);min-width:80px;text-align:right">R$ ${m.preco.toFixed(2)}/g</div>
-    <div style="display:flex;gap:4px;margin-left:8px">${!m.padrao?`<button class="btn sm" onclick="setMatPad('${m.id}')">☆</button>`:`<button class="btn sm" style="color:var(--ac)" disabled>★</button>`}
-    <button class="btn sm" onclick="openMat('${m.id}')">✏</button><button class="btn sm dg" onclick="delMat('${m.id}')">✕</button></div></div>`).join('')}</div></div>
+    <div style="display:flex;gap:4px;margin-left:8px">${!m.padrao?`<button class="btn sm" onclick="setMatPad('${m.id}')">*</button>`:`<button class="btn sm" style="color:var(--ac)" disabled>*</button>`}
+    <button class="btn sm" onclick="openMat('${m.id}')"></button><button class="btn sm dg" onclick="delMat('${m.id}')">X</button></div></div>`).join('')}</div></div>
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Padrões de custo</h3><p>Valores globais padrão</p></div></div>
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Padroes de custo</h3><p>Valores globais padrao</p></div></div>
   <div class="cb"><div class="g3">
-    <div class="fg"><label>Custo máquina (R$/h)</label><input id="cfg-maq" type="number" step="0.5" value="${S.cfg.maqCusto}"></div>
-    <div class="fg"><label>Potência (W)</label><input id="cfg-pw" type="number" step="10" value="${S.cfg.maqPotencia}"></div>
+    <div class="fg"><label>Custo maquina (R$/h)</label><input id="cfg-maq" type="number" step="0.5" value="${S.cfg.maqCusto}"></div>
+    <div class="fg"><label>Potencia (W)</label><input id="cfg-pw" type="number" step="10" value="${S.cfg.maqPotencia}"></div>
     <div class="fg"><label>Energia (R$/kWh)</label><input id="cfg-kw" type="number" step="0.1" value="${S.cfg.energia}"></div>
-    <div class="fg"><label>Mão de obra (R$/h)</label><input id="cfg-lab" type="number" step="5" value="${S.cfg.laborRate}"></div>
-    <div class="fg"><label>Margem padrão (%)</label><input id="cfg-mg" type="number" step="5" value="${S.cfg.margem}"></div>
+    <div class="fg"><label>Mao de obra (R$/h)</label><input id="cfg-lab" type="number" step="5" value="${S.cfg.laborRate}"></div>
+    <div class="fg"><label>Margem padrao (%)</label><input id="cfg-mg" type="number" step="5" value="${S.cfg.margem}"></div>
     <div class="fg"><label>Impostos (%)</label><input id="cfg-tx" type="number" step="1" value="${S.cfg.imposto}"></div>
     <div class="fg"><label>Taxa de falhas (%)</label><input id="cfg-fl" type="number" step="1" value="${S.cfg.falha}"></div>
   </div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
-    <button class="btn pr" onclick="saveCfgG()">Salvar padrões</button>
+    <button class="btn pr" onclick="saveCfgG()">Salvar padroes</button>
   </div></div></div>
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Dados do negócio</h3><p>Aparecem no PDF e mensagens do WhatsApp</p></div></div>
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Dados do negocio</h3><p>Aparecem no PDF e mensagens do WhatsApp</p></div></div>
   <div class="cb"><div class="g2">
-    <div class="fg"><label>🏪 Nome do negócio / marca</label><input id="cfg-loja" value="${S.cfg.nomeLoja||''}" placeholder="Ex: 3D Centrico"></div>
-    <div class="fg"><label>📱 WhatsApp (com DDD)</label><input id="cfg-wpp" value="${S.cfg.whatsapp||''}" placeholder="Ex: (83) 99999-9999"></div>
-    <div class="fg"><label>✉ E-mail de contato</label><input id="cfg-email" value="${S.cfg.email||''}" placeholder="Ex: contato@3dcentrico.com.br"></div>
-    <div class="fg"><label>🌐 Site / Link do negócio</label><input id="cfg-site" value="${S.cfg.site||''}" placeholder="Ex: www.3dcentrico.com.br"></div>
-    <div class="fg"><label>📷 Instagram</label><input id="cfg-ig" value="${S.cfg.instagram||''}" placeholder="Ex: @3dcentrico"></div>
-    <div class="fg"><label>📘 Facebook</label><input id="cfg-fb" value="${S.cfg.facebook||''}" placeholder="Ex: facebook.com/3dcentrico"></div>
-    <div class="fg"><label>🎵 TikTok</label><input id="cfg-tiktok" value="${S.cfg.tiktok||''}" placeholder="Ex: @3dcentrico"></div>
-    <div class="fg"><label>▶ YouTube</label><input id="cfg-yt" value="${S.cfg.youtube||''}" placeholder="Ex: youtube.com/@3dcentrico"></div>
-    <div class="fg s2"><label>📍 Localização / Endereço</label><input id="cfg-loc" value="${S.cfg.localizacao||''}" placeholder="Ex: Rua das Impressoes, 3D - Campina Grande / PB"></div>
-    <div class="fg s2"><label>💬 Assinatura dos documentos</label><input id="cfg-ass" value="${S.cfg.assinatura||''}" placeholder="Ex: Qualquer duvida, estou a disposicao!"></div>
+    <div class="fg"><label> Nome do negocio / marca</label><input id="cfg-loja" value="${S.cfg.nomeLoja||''}" placeholder="Ex: 3D Centrico"></div>
+    <div class="fg"><label> WhatsApp (com DDD)</label><input id="cfg-wpp" value="${S.cfg.whatsapp||''}" placeholder="Ex: (83) 99999-9999"></div>
+    <div class="fg"><label> E-mail de contato</label><input id="cfg-email" value="${S.cfg.email||''}" placeholder="Ex: contato@3dcentrico.com.br"></div>
+    <div class="fg"><label> Site / Link do negocio</label><input id="cfg-site" value="${S.cfg.site||''}" placeholder="Ex: www.3dcentrico.com.br"></div>
+    <div class="fg"><label> Instagram</label><input id="cfg-ig" value="${S.cfg.instagram||''}" placeholder="Ex: @3dcentrico"></div>
+    <div class="fg"><label> Facebook</label><input id="cfg-fb" value="${S.cfg.facebook||''}" placeholder="Ex: facebook.com/3dcentrico"></div>
+    <div class="fg"><label> TikTok</label><input id="cfg-tiktok" value="${S.cfg.tiktok||''}" placeholder="Ex: @3dcentrico"></div>
+    <div class="fg"><label> YouTube</label><input id="cfg-yt" value="${S.cfg.youtube||''}" placeholder="Ex: youtube.com/@3dcentrico"></div>
+    <div class="fg s2"><label> Localizacao / Endereco</label><input id="cfg-loc" value="${S.cfg.localizacao||''}" placeholder="Ex: Rua das Impressoes, 3D - Campina Grande / PB"></div>
+    <div class="fg s2"><label> Assinatura dos documentos</label><input id="cfg-ass" value="${S.cfg.assinatura||''}" placeholder="Ex: Qualquer duvida, estou a disposicao!"></div>
   </div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
     <button class="btn pr" onclick="saveCfgN()">Salvar dados</button>
   </div></div></div>
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Modelo de fundo do PDF</h3><p>Imagem A4 com seu topo e rodape personalizados — o conteudo e colocado por cima</p></div></div>
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Modelo de fundo do PDF</h3><p>Imagem A4 com seu topo e rodape personalizados - o conteudo e colocado por cima</p></div></div>
   <div class="cb">
     <div style="background:var(--acb);border:1px solid #c7d9ff;border-radius:var(--rs);padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.6">
       <strong>Como funciona:</strong> crie uma imagem PNG no <strong>Canva, Photoshop</strong> ou qualquer editor no tamanho <strong>A4 (210 x 297 mm / 794 x 1123 px a 96dpi)</strong> com seu topo e rodape personalizados. Deixe a area do meio em <strong>branco</strong>. Faca upload aqui e o app usara sua imagem como fundo do PDF, colocando os dados do orcamento/recibo na area branca.
@@ -1671,7 +1671,7 @@ function rCfg(){
       </div>
     </div>
     <div style="background:var(--wnb);border:1px solid #f0d080;border-radius:var(--rs);padding:10px 14px;margin-top:12px;font-size:12px">
-      <strong>Dica para o Canva:</strong> Crie um design no formato "A4" → adicione seu cabecalho e rodape → deixe o miolo em branco → baixe como PNG de alta qualidade → faca upload aqui. O limite de upload e de 5MB.
+      <strong>Dica para o Canva:</strong> Crie um design no formato "A4" > adicione seu cabecalho e rodape > deixe o miolo em branco > baixe como PNG de alta qualidade > faca upload aqui. O limite de upload e de 5MB.
     </div>
   </div></div>
 
@@ -1679,73 +1679,73 @@ function rCfg(){
   <div class="cb"><div class="g2">
     <div class="fg"><label>Chave Pix</label><input id="cfg-pix" value="${S.cfg.pix||''}" placeholder="CPF, e-mail, telefone..."></div>
     <div class="fg"><label>Link de pagamento</label><input id="cfg-link" value="${S.cfg.linkPagamento||''}" placeholder="https://mpago.la/..."></div>
-    <div class="fg"><label>Logo (PNG/JPG — PDF)</label>
+    <div class="fg"><label>Logo (PNG/JPG - PDF)</label>
       <input type="file" id="cfg-logo" accept="image/*" onchange="loadImg(this,'logo')" style="padding:5px;font-size:12px">
       <div id="prev-logo">${imgPreview(S.cfg.logoBase64,'logo','34px')}</div>
     </div>
-    <div class="fg"><label>QR Code Pix (PNG — PDF)</label>
+    <div class="fg"><label>QR Code Pix (PNG - PDF)</label>
       <input type="file" id="cfg-qr" accept="image/*" onchange="loadImg(this,'qrcode')" style="padding:5px;font-size:12px">
       <div id="prev-qr">${imgPreview(S.cfg.qrcodeBase64,'qrcode','44px')}</div>
     </div>
   </div>
   <div class="sdiv">Formas de pagamento no PDF</div>
   <div style="display:flex;gap:0;flex-wrap:wrap">
-    ${chk('pix','Pix',PP,'pdfPagamentos')}${chk('cartao','Cartão',PP,'pdfPagamentos')}${chk('dinheiro','Dinheiro',PP,'pdfPagamentos')}${chk('link','Link de pagamento',PP,'pdfPagamentos')}${chk('qrcode','QR Code Pix',PP,'pdfPagamentos')}
+    ${chk('pix','Pix',PP,'pdfPagamentos')}${chk('cartao','Cartao',PP,'pdfPagamentos')}${chk('dinheiro','Dinheiro',PP,'pdfPagamentos')}${chk('link','Link de pagamento',PP,'pdfPagamentos')}${chk('qrcode','QR Code Pix',PP,'pdfPagamentos')}
   </div>
-  <div class="sdiv">Itens visíveis no orçamento PDF</div>
+  <div class="sdiv">Itens visiveis no orcamento PDF</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-    ${chk('material','Material e peso',PM,'pdfMostrar')}${chk('tempo','Tempo de impressão',PM,'pdfMostrar')}
-    ${chk('labor','Mão de obra',PM,'pdfMostrar')}${chk('extras','Extras / acabamento',PM,'pdfMostrar')}
+    ${chk('material','Material e peso',PM,'pdfMostrar')}${chk('tempo','Tempo de impressao',PM,'pdfMostrar')}
+    ${chk('labor','Mao de obra',PM,'pdfMostrar')}${chk('extras','Extras / acabamento',PM,'pdfMostrar')}
     ${chk('margem','Margem de lucro',PM,'pdfMostrar')}${chk('imposto','Impostos',PM,'pdfMostrar')}
-    ${chk('desconto','Desconto',PM,'pdfMostrar')}${chk('unitario','Preço unitário',PM,'pdfMostrar')}
+    ${chk('desconto','Desconto',PM,'pdfMostrar')}${chk('unitario','Preco unitario',PM,'pdfMostrar')}
   </div>
   <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
     <button class="btn pr" onclick="saveCfgP()">Salvar pagamentos e PDF</button>
   </div></div></div>
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Configurações do Recibo</h3><p>Personalize textos, formas de pagamento e assinatura</p></div></div>
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Configuracoes do Recibo</h3><p>Personalize textos, formas de pagamento e assinatura</p></div></div>
   <div class="cb">
     <div class="sdiv">Textos do recibo</div>
     <div class="g2">
-      <div class="fg s2"><label>Texto introdutório <span style="color:var(--mt);font-size:11px">(use {cliente} e {emitente})</span></label>
+      <div class="fg s2"><label>Texto introdutorio <span style="color:var(--mt);font-size:11px">(use {cliente} e {emitente})</span></label>
         <input id="cfg-rint" value="${(S.cfg.reciboTextoIntro||'').replace(/"/g,'&quot;')}" placeholder="Declaro que recebi de {cliente} a quantia de:"></div>
-      <div class="fg s2"><label>Texto de referência <span style="color:var(--mt);font-size:11px">(use {descricao}, {cliente})</span></label>
+      <div class="fg s2"><label>Texto de referencia <span style="color:var(--mt);font-size:11px">(use {descricao}, {cliente})</span></label>
         <input id="cfg-rref" value="${(S.cfg.reciboTextoRef||'').replace(/"/g,'&quot;')}" placeholder="Referente a: {descricao}"></div>
-      <div class="fg s2"><label>Texto do rodapé do recibo (opcional)</label>
-        <input id="cfg-rrod" value="${(S.cfg.reciboRodape||'').replace(/"/g,'&quot;')}" placeholder="Ex: Este recibo tem validade legal conforme art. 320 do Código Civil."></div>
+      <div class="fg s2"><label>Texto do rodape do recibo (opcional)</label>
+        <input id="cfg-rrod" value="${(S.cfg.reciboRodape||'').replace(/"/g,'&quot;')}" placeholder="Ex: Este recibo tem validade legal conforme art. 320 do Codigo Civil."></div>
     </div>
-    <div class="sdiv">Formas de pagamento disponíveis</div>
-    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Gerencie as formas que aparecem nas opções ao criar um recibo. Você pode adicionar novas, editar detalhes (ex: número de conta) e ativar/desativar.</p>
+    <div class="sdiv">Formas de pagamento disponiveis</div>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Gerencie as formas que aparecem nas opcoes ao criar um recibo. Voce pode adicionar novas, editar detalhes (ex: numero de conta) e ativar/desativar.</p>
     <div id="fps-list">${(S.cfg.formasPagamento||[]).map(f=>'<div class="lr" style="flex-wrap:wrap;gap:6px">'+
       '<label class="chk-row" style="flex:0 0 auto"><input type="checkbox" '+(f.ativo?'checked':'')+' onchange="toggleFP(\''+f.id+'\',this.checked)"> <strong>'+f.nome+'</strong></label>'+
-      '<input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe (ex: chave pix, nº conta...)" value="'+(f.detalhe||'')+'" oninput="updateFPDetalhe(\''+f.id+'\',this.value)">'+
-      '<button class="btn sm dg" onclick="delFP(\''+f.id+'\')">✕</button></div>').join('')}</div>
+      '<input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe (ex: chave pix, n conta...)" value="'+(f.detalhe||'')+'" oninput="updateFPDetalhe(\''+f.id+'\',this.value)">'+
+      '<button class="btn sm dg" onclick="delFP(\''+f.id+'\')">X</button></div>').join('')}</div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-      <input id="nova-fp" style="flex:1;min-width:180px;padding:7px 11px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-family:inherit" placeholder="Nova forma (ex: Boleto bancário)">
+      <input id="nova-fp" style="flex:1;min-width:180px;padding:7px 11px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-family:inherit" placeholder="Nova forma (ex: Boleto bancario)">
       <button class="btn pr" onclick="addFP()">+ Adicionar</button>
     </div>
     <div class="sdiv">Assinatura virtual</div>
-    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Faça sua assinatura em papel, fotografe ou escaneie, e faça upload aqui. Ela aparecerá no recibo quando selecionada.</p>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Faca sua assinatura em papel, fotografe ou escaneie, e faca upload aqui. Ela aparecera no recibo quando selecionada.</p>
     <div class="fg">
-      <label>Upload da assinatura (PNG/JPG transparente — ideal)</label>
+      <label>Upload da assinatura (PNG/JPG transparente - ideal)</label>
       <input type="file" id="cfg-ass-img" accept="image/*" onchange="loadImg(this,'assinatura')" style="padding:5px;font-size:12px">
       <div id="ass-preview">${imgPreview(S.cfg.assinaturaBase64,'assinatura','50px')}</div>
     </div>
     <label class="chk-row" style="margin-top:10px">
-      <input type="checkbox" ${S.cfg.usarAssinatura?'checked':''} onchange="S.cfg.usarAssinatura=this.checked;saveDrive()"> Usar assinatura por padrão em novos recibos
+      <input type="checkbox" ${S.cfg.usarAssinatura?'checked':''} onchange="S.cfg.usarAssinatura=this.checked;saveDrive()"> Usar assinatura por padrao em novos recibos
     </label>
     <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
-      <button class="btn pr" onclick="saveCfgRec()">Salvar configurações do recibo</button>
+      <button class="btn pr" onclick="saveCfgRec()">Salvar configuracoes do recibo</button>
     </div>
   </div></div>
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Google Drive</h3><p>Sincronização automática</p></div></div>
+  <div class="cs"><div class="ch"><div class="ch-t"><h3>Google Drive</h3><p>Sincronizacao automatica</p></div></div>
   <div class="cb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div class="dr-dot ${S.driveOk?'ok':''}" style="width:10px;height:10px;flex-shrink:0"></div>
-    <div style="flex:1"><div style="font-size:13px;font-weight:500">${S.driveOk?'Conectado ao Google Drive':'Não conectado'}</div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:500">${S.driveOk?'Conectado ao Google Drive':'Nao conectado'}</div>
     <div style="font-size:12px;color:var(--mt)">${S.driveOk?'Arquivo: print3d_v4.json':'Dados apenas locais'}</div></div>
     <button class="btn ${S.driveOk?'':'pr'}" onclick="connectDrive()">${S.driveOk?'Reconectar':'Conectar Drive'}</button>
-    ${S.driveOk?`<button class="btn" onclick="saveDrive().then(()=>toast('✓ Sincronizado!'))">↻ Sync</button>`:''}
+    ${S.driveOk?`<button class="btn" onclick="saveDrive().then(()=>toast('OK Sincronizado!'))"> Sync</button>`:''}
   </div></div>
   </div>`;
 }
@@ -1754,35 +1754,35 @@ function saveCfgG(){
   S.cfg.maqCusto=gn('cfg-maq')||3.5;S.cfg.maqPotencia=gn('cfg-pw')||150;
   S.cfg.energia=gn('cfg-kw')||0.9;S.cfg.laborRate=gn('cfg-lab')||40;
   S.cfg.margem=gn('cfg-mg')||40;S.cfg.imposto=gn('cfg-tx')||6;S.cfg.falha=gn('cfg-fl')||5;
-  saveDrive();toast('✓ Padrões salvos!');
+  saveDrive();toast('OK Padroes salvos!');
 }
 function saveCfgN(){
   S.cfg.nomeLoja=vv('cfg-loja');S.cfg.whatsapp=vv('cfg-wpp');S.cfg.email=vv('cfg-email');
   S.cfg.site=vv('cfg-site');S.cfg.instagram=vv('cfg-ig');S.cfg.facebook=vv('cfg-fb');
   S.cfg.tiktok=vv('cfg-tiktok');S.cfg.youtube=vv('cfg-yt');
   S.cfg.localizacao=vv('cfg-loc');S.cfg.assinatura=vv('cfg-ass');
-  saveDrive();toast('✓ Dados salvos!');
+  saveDrive();toast('OK Dados salvos!');
 }
 function saveCfgP(){
   S.cfg.pix=vv('cfg-pix');S.cfg.linkPagamento=vv('cfg-link');
-  saveDrive();toast('✓ Dados de pagamento salvos!');
+  saveDrive();toast('OK Dados de pagamento salvos!');
 }
 function saveCfgRec(){
   S.cfg.reciboTextoIntro=vv('cfg-rint')||'Declaro que recebi de {cliente} a quantia de:';
   S.cfg.reciboTextoRef=vv('cfg-rref')||'Referente a: {descricao}';
   S.cfg.reciboRodape=vv('cfg-rrod');
-  saveDrive();toast('✓ Configurações do recibo salvas!');
+  saveDrive();toast('OK Configuracoes do recibo salvas!');
 }
 function addFP(){
   const nome=document.getElementById('nova-fp')?.value.trim();
-  if(!nome)return toast('⚠ Digite o nome da forma de pagamento');
+  if(!nome)return toast('(!) Digite o nome da forma de pagamento');
   if(!S.cfg.formasPagamento)S.cfg.formasPagamento=[];
   S.cfg.formasPagamento.push({id:'fp'+Date.now(),nome,ativo:true,detalhe:''});
-  saveDrive();toast('✓ Forma adicionada!');nav('cfg');
+  saveDrive();toast('OK Forma adicionada!');nav('cfg');
 }
 function delFP(id){
   S.cfg.formasPagamento=S.cfg.formasPagamento.filter(f=>f.id!==id);
-  saveDrive();toast('✓ Removida');nav('cfg');
+  saveDrive();toast('OK Removida');nav('cfg');
 }
 function toggleFP(id,val){
   const f=S.cfg.formasPagamento?.find(x=>x.id===id);if(f)f.ativo=val;saveDrive();
@@ -1819,15 +1819,15 @@ function openImp(id){
   document.getElementById('ipad').checked=p.padrao||false;openM('m-imp');
 }
 function saveImp(){
-  const nome=vv('in');if(!nome)return toast('⚠ Nome é obrigatório');
+  const nome=vv('in');if(!nome)return toast('(!) Nome e obrigatorio');
   const isPad=document.getElementById('ipad').checked;
   if(isPad)S.impressoras.forEach(p=>p.padrao=false);
   const obj={id:S.editImp||uid(),nome,custoPorHora:gn('ih')||3.5,potencia:gn('ipw')||150,volume:vv('ivol'),tipo:document.getElementById('itp').value,obs:vv('iob'),padrao:isPad};
   S.editImp?S.impressoras=S.impressoras.map(p=>p.id===S.editImp?obj:p):S.impressoras.push(obj);
-  closeM('m-imp');saveDrive();toast('✓ Impressora salva!');nav('cfg');
+  closeM('m-imp');saveDrive();toast('OK Impressora salva!');nav('cfg');
 }
-function delImp(id){S.impressoras=S.impressoras.filter(x=>x.id!==id);saveDrive();toast('✓ Removida');nav('cfg')}
-function setImpPad(id){S.impressoras.forEach(p=>p.padrao=p.id===id);saveDrive();toast('✓ Padrão atualizado');nav('cfg')}
+function delImp(id){S.impressoras=S.impressoras.filter(x=>x.id!==id);saveDrive();toast('OK Removida');nav('cfg')}
+function setImpPad(id){S.impressoras.forEach(p=>p.padrao=p.id===id);saveDrive();toast('OK Padrao atualizado');nav('cfg')}
 
 function openMat(id){
   S.editMat=id||null;document.getElementById('mm-t').textContent=id?'Editar material':'Novo material';
@@ -1837,29 +1837,29 @@ function openMat(id){
 }
 function saveMat(){
   const nome=vv('mn'),preco=parseFloat(document.getElementById('mp').value);
-  if(!nome)return toast('⚠ Nome é obrigatório');if(!preco||preco<=0)return toast('⚠ Custo inválido');
+  if(!nome)return toast('(!) Nome e obrigatorio');if(!preco||preco<=0)return toast('(!) Custo invalido');
   const isPad=document.getElementById('mdef').checked;if(isPad)S.materiais.forEach(m=>m.padrao=false);
   const obj={id:S.editMat||uid(),nome,preco,desc:vv('md'),padrao:isPad};
   S.editMat?S.materiais=S.materiais.map(m=>m.id===S.editMat?obj:m):S.materiais.push(obj);
-  closeM('m-mat');saveDrive();toast('✓ Material salvo!');nav('cfg');
+  closeM('m-mat');saveDrive();toast('OK Material salvo!');nav('cfg');
 }
 function delMat(id){
-  if(S.materiais.length<=1)return toast('⚠ Mantenha ao menos um material');
+  if(S.materiais.length<=1)return toast('(!) Mantenha ao menos um material');
   const m=S.materiais.find(x=>x.id===id);if(m?.padrao){const o=S.materiais.find(x=>x.id!==id);if(o)o.padrao=true}
-  S.materiais=S.materiais.filter(x=>x.id!==id);saveDrive();toast('✓ Removido');nav('cfg');
+  S.materiais=S.materiais.filter(x=>x.id!==id);saveDrive();toast('OK Removido');nav('cfg');
 }
-function setMatPad(id){S.materiais.forEach(m=>m.padrao=m.id===id);saveDrive();toast('✓ Padrão atualizado');nav('cfg')}
+function setMatPad(id){S.materiais.forEach(m=>m.padrao=m.id===id);saveDrive();toast('OK Padrao atualizado');nav('cfg')}
 
 function confDel(tipo,id){
-  const msgs={cli:'Excluir este cliente?',orc:'Excluir este orçamento?',rec:'Excluir este recibo?',lanc:'Excluir este lançamento?'};
-  document.getElementById('dl-t').textContent='Confirmar exclusão';
+  const msgs={cli:'Excluir este cliente?',orc:'Excluir este orcamento?',rec:'Excluir este recibo?',lanc:'Excluir este lancamento?'};
+  document.getElementById('dl-t').textContent='Confirmar exclusao';
   document.getElementById('dl-m').textContent=msgs[tipo]||'Confirmar?';
   document.getElementById('dl-ok').onclick=()=>{
     if(tipo==='cli')S.clientes=S.clientes.filter(c=>c.id!==id);
     else if(tipo==='orc')S.orcamentos=S.orcamentos.filter(o=>o.id!==id);
     else if(tipo==='rec')S.recibos=S.recibos.filter(r=>r.id!==id);
     else if(tipo==='lanc')S.lancamentos=S.lancamentos.filter(l=>l.id!==id);
-    closeM('m-del');saveDrive();toast('✓ Excluído');renderPage();
+    closeM('m-del');saveDrive();toast('OK Excluido');renderPage();
   };openM('m-del');
 }
 
