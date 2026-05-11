@@ -515,6 +515,11 @@ const defMat=()=>S.materiais.find(m=>m.padrao)||S.materiais[0]||{preco:0.08};
 const openM=id=>document.getElementById(id).classList.add('open');
 const closeM=id=>document.getElementById(id).classList.remove('open');
 const isMob=()=>window.innerWidth<=768;
+function imgPreview(src,key,h){
+  if(!src)return key==='assinatura'?'<div style="font-size:12px;color:var(--mt);margin-top:6px">Nenhuma assinatura cadastrada ainda.</div>':'';
+  const clearFn=key==='logo'?'S.cfg.logoBase64':key==='qrcode'?'S.cfg.qrcodeBase64':'S.cfg.assinaturaBase64';
+  return '<div style="margin-top:6px;display:flex;align-items:center;gap:8px"><img src="'+src+'" style="height:'+h+';border-radius:4px;border:1px solid var(--bdr);background:#f8f9fa;padding:2px"><button class="btn sm dg" onclick="'+clearFn+'=\'\';saveDrive();nav(\'cfg\')">Remover</button></div>';
+}
 const fiadoSaldo=cid=>{
   const orcs=S.orcamentos.filter(o=>o.clienteId===cid&&(o.pagamento==='fiado'||o.pagamento==='parcial')).reduce((s,o)=>s+(o.saldoDevedor||0),0);
   const lancs=S.lancamentos.filter(l=>l.clienteId===cid).reduce((s,l)=>s+(l.tipo==='debito'?l.valor:-l.valor),0);
@@ -1546,11 +1551,11 @@ function rCfg(){
     <div class="fg"><label>Link de pagamento</label><input id="cfg-link" value="${S.cfg.linkPagamento||''}" placeholder="https://mpago.la/..."></div>
     <div class="fg"><label>Logo (PNG/JPG — PDF)</label>
       <input type="file" id="cfg-logo" accept="image/*" onchange="loadImg(this,'logo')" style="padding:5px;font-size:12px">
-      ${S.cfg.logoBase64?`<div style="margin-top:6px;display:flex;align-items:center;gap:8px"><img src="${S.cfg.logoBase64}" style="height:34px;border-radius:4px;border:1px solid var(--bdr)"><button class="btn sm dg" onclick="S.cfg.logoBase64='';saveDrive();nav('cfg')">Remover</button></div>`:''}
+      <div id="prev-logo">${imgPreview(S.cfg.logoBase64,'logo','34px')}</div>
     </div>
     <div class="fg"><label>QR Code Pix (PNG — PDF)</label>
       <input type="file" id="cfg-qr" accept="image/*" onchange="loadImg(this,'qrcode')" style="padding:5px;font-size:12px">
-      ${S.cfg.qrcodeBase64?`<div style="margin-top:6px;display:flex;align-items:center;gap:8px"><img src="${S.cfg.qrcodeBase64}" style="height:44px;border-radius:4px;border:1px solid var(--bdr)"><button class="btn sm dg" onclick="S.cfg.qrcodeBase64='';saveDrive();nav('cfg')">Remover</button></div>`:''}
+      <div id="prev-qr">${imgPreview(S.cfg.qrcodeBase64,'qrcode','44px')}</div>
     </div>
   </div>
   <div class="sdiv">Formas de pagamento no PDF</div>
@@ -1581,11 +1586,10 @@ function rCfg(){
     </div>
     <div class="sdiv">Formas de pagamento disponíveis</div>
     <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Gerencie as formas que aparecem nas opções ao criar um recibo. Você pode adicionar novas, editar detalhes (ex: número de conta) e ativar/desativar.</p>
-    <div id="fps-list">${(S.cfg.formasPagamento||[]).map(f=>`<div class="lr" id="fpl-${f.id}" style="flex-wrap:wrap;gap:6px">
-      <label class="chk-row" style="flex:0 0 auto"><input type="checkbox" ${f.ativo?'checked':''} onchange="toggleFP('${f.id}',this.checked)"> <strong>${f.nome}</strong></label>
-      <input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe (ex: chave pix, nº conta...)" value="${f.detalhe||''}" oninput="updateFPDetalhe('${f.id}',this.value)">
-      <button class="btn sm dg" onclick="delFP('${f.id}')">✕</button>
-    </div>`).join('')}</div>
+    <div id="fps-list">${(S.cfg.formasPagamento||[]).map(f=>'<div class="lr" style="flex-wrap:wrap;gap:6px">'+
+      '<label class="chk-row" style="flex:0 0 auto"><input type="checkbox" '+(f.ativo?'checked':'')+' onchange="toggleFP(\''+f.id+'\',this.checked)"> <strong>'+f.nome+'</strong></label>'+
+      '<input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe (ex: chave pix, nº conta...)" value="'+(f.detalhe||'')+'" oninput="updateFPDetalhe(\''+f.id+'\',this.value)">'+
+      '<button class="btn sm dg" onclick="delFP(\''+f.id+'\')">✕</button></div>').join('')}</div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
       <input id="nova-fp" style="flex:1;min-width:180px;padding:7px 11px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-family:inherit" placeholder="Nova forma (ex: Boleto bancário)">
       <button class="btn pr" onclick="addFP()">+ Adicionar</button>
@@ -1595,10 +1599,7 @@ function rCfg(){
     <div class="fg">
       <label>Upload da assinatura (PNG/JPG transparente — ideal)</label>
       <input type="file" id="cfg-ass-img" accept="image/*" onchange="loadImg(this,'assinatura')" style="padding:5px;font-size:12px">
-      ${S.cfg.assinaturaBase64?`<div style="margin-top:8px;display:flex;align-items:center;gap:10px">
-        <img src="${S.cfg.assinaturaBase64}" style="height:50px;border-radius:4px;border:1px solid var(--bdr);background:#f8f9fa;padding:4px">
-        <button class="btn sm dg" onclick="S.cfg.assinaturaBase64='';saveDrive();nav('cfg')">Remover assinatura</button>
-      </div>`:'<div style="font-size:12px;color:var(--mt);margin-top:6px">Nenhuma assinatura cadastrada ainda.</div>'}
+      <div id="ass-preview">${imgPreview(S.cfg.assinaturaBase64,'assinatura','50px')}</div>
     </div>
     <label class="chk-row" style="margin-top:10px">
       <input type="checkbox" ${S.cfg.usarAssinatura?'checked':''} onchange="S.cfg.usarAssinatura=this.checked;saveDrive()"> Usar assinatura por padrão em novos recibos
@@ -1665,10 +1666,6 @@ function loadImg(input,key){
     if(key==='logo')S.cfg.logoBase64=e.target.result;
     else if(key==='qrcode')S.cfg.qrcodeBase64=e.target.result;
     else if(key==='assinatura')S.cfg.assinaturaBase64=e.target.result;
-    saveDrive();nav('cfg');toast('✓ Imagem carregada!');};r.readAsDataURL(file);
-}
-  const r=new FileReader();r.onload=e=>{
-    if(key==='logo')S.cfg.logoBase64=e.target.result;else S.cfg.qrcodeBase64=e.target.result;
     saveDrive();nav('cfg');toast('✓ Imagem carregada!');};r.readAsDataURL(file);
 }
 
