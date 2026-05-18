@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- v18ada4e2 -->
+<!-- v9f3a20a4 -->
+
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -1999,165 +2000,161 @@ function scToOrc(){
 // ---
 function rCfg(){
   const PM=S.cfg.pdfMostrar||{};const PP=S.cfg.pdfPagamentos||{};
-  const chk=(key,lbl,obj,objName)=>`<label class="chk-row"><input type="checkbox" ${obj[key]!==false?'checked':''} onchange="S.cfg.${objName}['${key}']=this.checked"> ${lbl}</label>`;
-  return`<div style="max-width:780px">
+  function chk(key,lbl,obj,objName){
+    return '<label class="chk-row"><input type="checkbox" '+(obj[key]!==false?'checked':'')+' onchange="S.cfg.'+objName+'[\''+key+'\']=this.checked"> '+lbl+'</label>';
+  }
+  // Impressoras rows
+  var impRows='';
+  if(S.impressoras.length){
+    S.impressoras.forEach(function(p){
+      var starBtn=!p.padrao?('<button class="btn sm" onclick="setImpPad(\''+p.id+'\')">* Padrao</button>'):('<button class="btn sm" style="color:var(--ac)" disabled>* Padrao</button>');
+      impRows+='<div class="lr"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">'+p.nome+'</span>'+bdg('gy',p.tipo||'FDM')+(p.padrao?bdg('bl','padrao'):'')+
+        '</div><div style="font-size:11px;color:var(--mt)">'+R(p.custoPorHora)+'/h  '+p.potencia+'W'+(p.volume?'  '+p.volume:'')+'</div></div>'+
+        '<div style="display:flex;gap:4px">'+starBtn+'<button class="btn sm" onclick="openImp(\''+p.id+'\')">Editar</button><button class="btn sm dg" onclick="delImp(\''+p.id+'\')">X</button></div></div>';
+    });
+  } else {
+    impRows='<div class="empty" style="padding:25px 0"><p>Nenhuma impressora cadastrada</p></div>';
+  }
+  // Materiais rows
+  var matRows='';
+  S.materiais.forEach(function(m){
+    var starBtn=!m.padrao?('<button class="btn sm" onclick="setMatPad(\''+m.id+'\')">* Padrao</button>'):('<button class="btn sm" style="color:var(--ac)" disabled>* Padrao</button>');
+    matRows+='<div class="lr"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">'+m.nome+'</span>'+(m.padrao?bdg('bl','padrao'):'')+
+      '</div>'+(m.desc?'<div style="font-size:11px;color:var(--mt)">'+m.desc+'</div>':'')+
+      '</div><div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--ac);min-width:80px;text-align:right">R$ '+m.preco.toFixed(2)+'/g</div>'+
+      '<div style="display:flex;gap:4px;margin-left:8px">'+starBtn+'<button class="btn sm" onclick="openMat(\''+m.id+'\')">Editar</button><button class="btn sm dg" onclick="delMat(\''+m.id+'\')">X</button></div></div>';
+  });
+  // Drive sync button
+  var driveSync=S.driveOk?'<button class="btn" onclick="saveDrive().then(()=>toast(\'Sincronizado!\'))">Sync</button>':'';
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Impressoras</h3><p>Configure suas impressoras</p></div><button class="btn pr sm" onclick="openImp()">+ Nova</button></div>
-  <div style="padding:0 16px">${S.impressoras.length?S.impressoras.map(p=>`<div class="lr">
-    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">${p.nome}</span>${bdg('gy',p.tipo||'FDM')}${p.padrao?bdg('bl','padrao'):''}</div>
-    <div style="font-size:11px;color:var(--mt)">${R(p.custoPorHora)}/h  ${p.potencia}W${p.volume?'  '+p.volume:''}</div></div>
-    <div style="display:flex;gap:4px">${!p.padrao?`<button class="btn sm" onclick="setImpPad('${p.id}')">*</button>`:`<button class="btn sm" style="color:var(--ac)" disabled>*</button>`}
-    <button class="btn sm" onclick="openImp('${p.id}')"></button><button class="btn sm dg" onclick="delImp('${p.id}')">X</button></div></div>`).join('')
-  :`<div class="empty" style="padding:25px 0"><p>Nenhuma impressora cadastrada</p></div>`}</div></div>
+  return '<div style="max-width:780px">'+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Materiais</h3><p>Gerencie materiais e custos</p></div><button class="btn pr sm" onclick="openMat()">+ Novo</button></div>
-  <div style="padding:0 16px">${S.materiais.map(m=>`<div class="lr">
-    <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:500;font-size:13px">${m.nome}</span>${m.padrao?bdg('bl','padrao'):''}</div>
-    ${m.desc?`<div style="font-size:11px;color:var(--mt)">${m.desc}</div>`:''}</div>
-    <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--ac);min-width:80px;text-align:right">R$ ${m.preco.toFixed(2)}/g</div>
-    <div style="display:flex;gap:4px;margin-left:8px">${!m.padrao?`<button class="btn sm" onclick="setMatPad('${m.id}')">*</button>`:`<button class="btn sm" style="color:var(--ac)" disabled>*</button>`}
-    <button class="btn sm" onclick="openMat('${m.id}')"></button><button class="btn sm dg" onclick="delMat('${m.id}')">X</button></div></div>`).join('')}</div></div>
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Impressoras</h3><p>Configure suas impressoras</p></div><button class="btn pr sm" onclick="openImp()">+ Nova</button></div>'+
+  '<div style="padding:0 16px">'+impRows+'</div></div>'+
 
-  ${rEmpresasCfg()}
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Materiais</h3><p>Gerencie materiais e custos</p></div><button class="btn pr sm" onclick="openMat()">+ Novo</button></div>'+
+  '<div style="padding:0 16px">'+matRows+'</div></div>'+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Padroes de custo</h3><p>Valores globais padrao</p></div></div>
-  <div class="cb"><div class="g3">
-    <div class="fg"><label>Custo maquina (R$/h)</label><input id="cfg-maq" type="number" step="0.5" value="${S.cfg.maqCusto}"></div>
-    <div class="fg"><label>Potencia (W)</label><input id="cfg-pw" type="number" step="10" value="${S.cfg.maqPotencia}"></div>
-    <div class="fg"><label>Energia (R$/kWh)</label><input id="cfg-kw" type="number" step="0.1" value="${S.cfg.energia}"></div>
-    <div class="fg"><label>Mao de obra (R$/h)</label><input id="cfg-lab" type="number" step="5" value="${S.cfg.laborRate}"></div>
-    <div class="fg"><label>Margem padrao (%)</label><input id="cfg-mg" type="number" step="5" value="${S.cfg.margem}"></div>
-    <div class="fg"><label>Impostos (%)</label><input id="cfg-tx" type="number" step="1" value="${S.cfg.imposto}"></div>
-    <div class="fg"><label>Taxa de falhas (%)</label><input id="cfg-fl" type="number" step="1" value="${S.cfg.falha}"></div>
-  </div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
-    <button class="btn pr" onclick="saveCfgG()">Salvar padroes</button>
-  </div></div></div>
+  rEmpresasCfg()+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Dados do negocio</h3><p>Aparecem no PDF e mensagens do WhatsApp</p></div></div>
-  <div class="cb"><div class="g2">
-    <div class="fg"><label> Nome do negocio / marca</label><input id="cfg-loja" value="${S.cfg.nomeLoja||''}" placeholder="Ex: 3D Centrico"></div>
-    <div class="fg"><label> WhatsApp (com DDD)</label><input id="cfg-wpp" value="${S.cfg.whatsapp||''}" placeholder="Ex: (83) 99999-9999"></div>
-    <div class="fg"><label> E-mail de contato</label><input id="cfg-email" value="${S.cfg.email||''}" placeholder="Ex: contato@3dcentrico.com.br"></div>
-    <div class="fg"><label> Site / Link do negocio</label><input id="cfg-site" value="${S.cfg.site||''}" placeholder="Ex: www.3dcentrico.com.br"></div>
-    <div class="fg"><label> Instagram</label><input id="cfg-ig" value="${S.cfg.instagram||''}" placeholder="Ex: @3dcentrico"></div>
-    <div class="fg"><label> Facebook</label><input id="cfg-fb" value="${S.cfg.facebook||''}" placeholder="Ex: facebook.com/3dcentrico"></div>
-    <div class="fg"><label> TikTok</label><input id="cfg-tiktok" value="${S.cfg.tiktok||''}" placeholder="Ex: @3dcentrico"></div>
-    <div class="fg"><label> YouTube</label><input id="cfg-yt" value="${S.cfg.youtube||''}" placeholder="Ex: youtube.com/@3dcentrico"></div>
-    <div class="fg s2"><label> Localizacao / Endereco</label><input id="cfg-loc" value="${S.cfg.localizacao||''}" placeholder="Ex: Rua das Impressoes, 3D - Campina Grande / PB"></div>
-    <div class="fg s2"><label> Assinatura dos documentos</label><input id="cfg-ass" value="${S.cfg.assinatura||''}" placeholder="Ex: Qualquer duvida, estou a disposicao!"></div>
-  </div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
-    <button class="btn pr" onclick="saveCfgN()">Salvar dados</button>
-  </div></div></div>
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Padroes de custo</h3><p>Valores globais padrao</p></div></div>'+
+  '<div class="cb"><div class="g3">'+
+  '<div class="fg"><label>Custo maquina (R$/h)</label><input id="cfg-maq" type="number" step="0.5" value="'+S.cfg.maqCusto+'"></div>'+
+  '<div class="fg"><label>Potencia (W)</label><input id="cfg-pw" type="number" step="10" value="'+S.cfg.maqPotencia+'"></div>'+
+  '<div class="fg"><label>Energia (R$/kWh)</label><input id="cfg-kw" type="number" step="0.1" value="'+S.cfg.energia+'"></div>'+
+  '<div class="fg"><label>Mao de obra (R$/h)</label><input id="cfg-lab" type="number" step="5" value="'+S.cfg.laborRate+'"></div>'+
+  '<div class="fg"><label>Margem padrao (%)</label><input id="cfg-mg" type="number" step="5" value="'+S.cfg.margem+'"></div>'+
+  '<div class="fg"><label>Impostos (%)</label><input id="cfg-tx" type="number" step="1" value="'+S.cfg.imposto+'"></div>'+
+  '<div class="fg"><label>Taxa de falhas (%)</label><input id="cfg-fl" type="number" step="1" value="'+S.cfg.falha+'"></div>'+
+  '</div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">'+
+  '<button class="btn pr" onclick="saveCfgG()">Salvar padroes</button></div></div></div>'+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Modelo de fundo do PDF</h3><p>Imagem A4 com seu topo e rodape personalizados - o conteudo e colocado por cima</p></div></div>
-  <div class="cb">
-    <div style="background:var(--acb);border:1px solid #c7d9ff;border-radius:var(--rs);padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.6">
-      <strong>Como funciona:</strong> crie uma imagem PNG no <strong>Canva, Photoshop</strong> ou qualquer editor no tamanho <strong>A4 (210 x 297 mm / 794 x 1123 px a 96dpi)</strong> com seu topo e rodape personalizados. Deixe a area do meio em <strong>branco</strong>. Faca upload aqui e o app usara sua imagem como fundo do PDF, colocando os dados do orcamento/recibo na area branca.
-    </div>
-    <div class="sdiv">Margens da area de conteudo</div>
-    <div class="g2" style="margin-bottom:16px">
-      <div class="fg"><label>Espaco reservado para o TOPO (mm)</label><input id="cfg-tmpl-topo" type="number" value="${S.cfg.pdfTemplateTopoMm||55}" min="20" max="150" step="5" placeholder="55"><div style="font-size:11px;color:var(--mt);margin-top:4px">Quantos mm do topo pertencem ao seu modelo (onde o conteudo NAO deve entrar)</div></div>
-      <div class="fg"><label>Espaco reservado para o RODAPE (mm)</label><input id="cfg-tmpl-rod" type="number" value="${S.cfg.pdfTemplateRodapeMm||25}" min="10" max="100" step="5" placeholder="25"><div style="font-size:11px;color:var(--mt);margin-top:4px">Quantos mm do rodape pertencem ao seu modelo</div></div>
-    </div>
-    <button class="btn pr" onclick="saveCfgTemplateMargens()" style="margin-bottom:16px">Salvar margens</button>
-    <div class="sdiv">Templates por tipo de documento</div>
-    <div class="g2">
-      <div class="fg">
-        <label>Modelo para ORCAMENTOS (PNG/JPG)</label>
-        <input type="file" id="cfg-tmpl-orc" accept="image/*" onchange="loadImg(this,'tmplOrc')" style="padding:5px;font-size:12px">
-        <div id="prev-tmpl-orc">${imgPreview(S.cfg.pdfTemplateOrc,'tmplOrc','60px')}</div>
-        <div style="font-size:11px;color:var(--mt);margin-top:4px">Se vazio, usa o modelo geral abaixo</div>
-      </div>
-      <div class="fg">
-        <label>Modelo para RECIBOS (PNG/JPG)</label>
-        <input type="file" id="cfg-tmpl-rec" accept="image/*" onchange="loadImg(this,'tmplRec')" style="padding:5px;font-size:12px">
-        <div id="prev-tmpl-rec">${imgPreview(S.cfg.pdfTemplateRec,'tmplRec','60px')}</div>
-        <div style="font-size:11px;color:var(--mt);margin-top:4px">Se vazio, usa o modelo geral abaixo</div>
-      </div>
-      <div class="fg s2">
-        <label>Modelo GERAL (usado para ambos se nao houver especifico)</label>
-        <input type="file" id="cfg-tmpl-geral" accept="image/*" onchange="loadImg(this,'tmpl')" style="padding:5px;font-size:12px">
-        <div id="prev-tmpl-geral">${imgPreview(S.cfg.pdfTemplate,'tmpl','60px')}</div>
-      </div>
-    </div>
-    <div style="background:var(--wnb);border:1px solid #f0d080;border-radius:var(--rs);padding:10px 14px;margin-top:12px;font-size:12px">
-      <strong>Dica para o Canva:</strong> Crie um design no formato "A4" > adicione seu cabecalho e rodape > deixe o miolo em branco > baixe como PNG de alta qualidade > faca upload aqui. O limite de upload e de 5MB.
-    </div>
-  </div></div>
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Dados do negocio</h3><p>Aparecem no PDF e mensagens do WhatsApp</p></div></div>'+
+  '<div class="cb"><div class="g2">'+
+  '<div class="fg"><label>Nome do negocio</label><input id="cfg-loja" value="'+( S.cfg.nomeLoja||'')+'" placeholder="Ex: 3D Centrico"></div>'+
+  '<div class="fg"><label>WhatsApp (com DDD)</label><input id="cfg-wpp" value="'+(S.cfg.whatsapp||'')+'" placeholder="(83) 99999-9999"></div>'+
+  '<div class="fg"><label>E-mail</label><input id="cfg-email" value="'+(S.cfg.email||'')+'" placeholder="contato@3dcentrico.com.br"></div>'+
+  '<div class="fg"><label>Site</label><input id="cfg-site" value="'+(S.cfg.site||'')+'" placeholder="www.3dcentrico.com.br"></div>'+
+  '<div class="fg"><label>Instagram</label><input id="cfg-ig" value="'+(S.cfg.instagram||'')+'" placeholder="@3dcentrico"></div>'+
+  '<div class="fg"><label>Facebook</label><input id="cfg-fb" value="'+(S.cfg.facebook||'')+'" placeholder="facebook.com/3dcentrico"></div>'+
+  '<div class="fg"><label>TikTok</label><input id="cfg-tiktok" value="'+(S.cfg.tiktok||'')+'" placeholder="@3dcentrico"></div>'+
+  '<div class="fg"><label>YouTube</label><input id="cfg-yt" value="'+(S.cfg.youtube||'')+'" placeholder="youtube.com/@3dcentrico"></div>'+
+  '<div class="fg s2"><label>Localizacao / Endereco</label><input id="cfg-loc" value="'+(S.cfg.localizacao||'')+'" placeholder="Rua das Impressoes, 3D - Campina Grande / PB"></div>'+
+  '<div class="fg s2"><label>Assinatura dos documentos</label><input id="cfg-ass" value="'+(S.cfg.assinatura||'')+'" placeholder="Qualquer duvida, estou a disposicao!"></div>'+
+  '</div><div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">'+
+  '<button class="btn pr" onclick="saveCfgN()">Salvar dados</button></div></div></div>'+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Pagamentos e PDF</h3><p>Dados exibidos no PDF</p></div></div>
-  <div class="cb"><div class="g2">
-    <div class="fg"><label>Chave Pix</label><input id="cfg-pix" value="${S.cfg.pix||''}" placeholder="CPF, e-mail, telefone..."></div>
-    <div class="fg"><label>Link de pagamento</label><input id="cfg-link" value="${S.cfg.linkPagamento||''}" placeholder="https://mpago.la/..."></div>
-    <div class="fg"><label>Logo (PNG/JPG - PDF)</label>
-      <input type="file" id="cfg-logo" accept="image/*" onchange="loadImg(this,'logo')" style="padding:5px;font-size:12px">
-      <div id="prev-logo">${imgPreview(S.cfg.logoBase64,'logo','34px')}</div>
-    </div>
-    <div class="fg"><label>QR Code Pix (PNG - PDF)</label>
-      <input type="file" id="cfg-qr" accept="image/*" onchange="loadImg(this,'qrcode')" style="padding:5px;font-size:12px">
-      <div id="prev-qr">${imgPreview(S.cfg.qrcodeBase64,'qrcode','44px')}</div>
-    </div>
-  </div>
-  <div class="sdiv">Formas de pagamento no PDF</div>
-  <div style="display:flex;gap:0;flex-wrap:wrap">
-    ${chk('pix','Pix',PP,'pdfPagamentos')}${chk('cartao','Cartao',PP,'pdfPagamentos')}${chk('dinheiro','Dinheiro',PP,'pdfPagamentos')}${chk('link','Link de pagamento',PP,'pdfPagamentos')}${chk('qrcode','QR Code Pix',PP,'pdfPagamentos')}
-  </div>
-  <div class="sdiv">Itens visiveis no orcamento PDF</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-    ${chk('material','Material e peso',PM,'pdfMostrar')}${chk('tempo','Tempo de impressao',PM,'pdfMostrar')}
-    ${chk('labor','Mao de obra',PM,'pdfMostrar')}${chk('extras','Extras / acabamento',PM,'pdfMostrar')}
-    ${chk('margem','Margem de lucro',PM,'pdfMostrar')}${chk('imposto','Impostos',PM,'pdfMostrar')}
-    ${chk('desconto','Desconto',PM,'pdfMostrar')}${chk('unitario','Preco unitario',PM,'pdfMostrar')}
-  </div>
-  <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
-    <button class="btn pr" onclick="saveCfgP()">Salvar pagamentos e PDF</button>
-  </div></div></div>
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Modelo de fundo do PDF</h3><p>Imagem A4 com seu topo e rodape personalizados</p></div></div>'+
+  '<div class="cb">'+
+  '<div style="background:var(--acb);border:1px solid #c7d9ff;border-radius:var(--rs);padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.6">'+
+  '<strong>Como funciona:</strong> crie uma imagem PNG no <strong>Canva</strong> no tamanho A4 (210x297mm) com seu topo e rodape. Deixe o meio em <strong>branco</strong>. Faca upload aqui.'+
+  '</div>'+
+  '<div class="sdiv">Margens da area de conteudo</div>'+
+  '<div class="g2" style="margin-bottom:16px">'+
+  '<div class="fg"><label>Espaco para o TOPO (mm)</label><input id="cfg-tmpl-topo" type="number" value="'+(S.cfg.pdfTemplateTopoMm||55)+'" min="20" max="150" step="5"></div>'+
+  '<div class="fg"><label>Espaco para o RODAPE (mm)</label><input id="cfg-tmpl-rod" type="number" value="'+(S.cfg.pdfTemplateRodapeMm||25)+'" min="10" max="100" step="5"></div>'+
+  '</div>'+
+  '<button class="btn pr" onclick="saveCfgTemplateMargens()" style="margin-bottom:16px">Salvar margens</button>'+
+  '<div class="sdiv">Templates por tipo de documento</div>'+
+  '<div class="g2">'+
+  '<div class="fg"><label>Modelo para ORCAMENTOS (PNG/JPG)</label>'+
+  '<input type="file" id="cfg-tmpl-orc" accept="image/*" onchange="loadImg(this,\'tmplOrc\')" style="padding:5px;font-size:12px">'+
+  '<div id="prev-tmpl-orc">'+imgPreview(S.cfg.pdfTemplateOrc,'tmplOrc','60px')+'</div></div>'+
+  '<div class="fg"><label>Modelo para RECIBOS (PNG/JPG)</label>'+
+  '<input type="file" id="cfg-tmpl-rec" accept="image/*" onchange="loadImg(this,\'tmplRec\')" style="padding:5px;font-size:12px">'+
+  '<div id="prev-tmpl-rec">'+imgPreview(S.cfg.pdfTemplateRec,'tmplRec','60px')+'</div></div>'+
+  '<div class="fg s2"><label>Modelo GERAL (para ambos se nao houver especifico)</label>'+
+  '<input type="file" id="cfg-tmpl-geral" accept="image/*" onchange="loadImg(this,\'tmpl\')" style="padding:5px;font-size:12px">'+
+  '<div id="prev-tmpl-geral">'+imgPreview(S.cfg.pdfTemplate,'tmpl','60px')+'</div></div>'+
+  '</div></div></div>'+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Configuracoes do Recibo</h3><p>Personalize textos, formas de pagamento e assinatura</p></div></div>
-  <div class="cb">
-    <div class="sdiv">Textos do recibo</div>
-    <div class="g2">
-      <div class="fg s2"><label>Texto introdutorio <span style="color:var(--mt);font-size:11px">(use {cliente} e {emitente})</span></label>
-        <input id="cfg-rint" value="${(S.cfg.reciboTextoIntro||'').replace(/"/g,'&quot;')}" placeholder="Declaro que recebi de {cliente} a quantia de:"></div>
-      <div class="fg s2"><label>Texto de referencia <span style="color:var(--mt);font-size:11px">(use {descricao}, {cliente})</span></label>
-        <input id="cfg-rref" value="${(S.cfg.reciboTextoRef||'').replace(/"/g,'&quot;')}" placeholder="Referente a: {descricao}"></div>
-      <div class="fg s2"><label>Texto do rodape do recibo (opcional)</label>
-        <input id="cfg-rrod" value="${(S.cfg.reciboRodape||'').replace(/"/g,'&quot;')}" placeholder="Ex: Este recibo tem validade legal conforme art. 320 do Codigo Civil."></div>
-    </div>
-    <div class="sdiv">Formas de pagamento disponiveis</div>
-    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Gerencie as formas que aparecem nas opcoes ao criar um recibo. Voce pode adicionar novas, editar detalhes (ex: numero de conta) e ativar/desativar.</p>
-    <div id="fps-list">${(S.cfg.formasPagamento||[]).map(f=>'<div class="lr" style="flex-wrap:wrap;gap:6px">'+
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Pagamentos e PDF</h3><p>Dados exibidos no PDF</p></div></div>'+
+  '<div class="cb"><div class="g2">'+
+  '<div class="fg"><label>Chave Pix</label><input id="cfg-pix" value="'+(S.cfg.pix||'')+'" placeholder="CPF, e-mail, telefone..."></div>'+
+  '<div class="fg"><label>Link de pagamento</label><input id="cfg-link" value="'+(S.cfg.linkPagamento||'')+'" placeholder="https://mpago.la/..."></div>'+
+  '<div class="fg"><label>Logo (PNG/JPG - PDF)</label>'+
+  '<input type="file" id="cfg-logo" accept="image/*" onchange="loadImg(this,\'logo\')" style="padding:5px;font-size:12px">'+
+  '<div id="prev-logo">'+imgPreview(S.cfg.logoBase64,'logo','34px')+'</div></div>'+
+  '<div class="fg"><label>QR Code Pix (PNG - PDF)</label>'+
+  '<input type="file" id="cfg-qr" accept="image/*" onchange="loadImg(this,\'qrcode\')" style="padding:5px;font-size:12px">'+
+  '<div id="prev-qr">'+imgPreview(S.cfg.qrcodeBase64,'qrcode','44px')+'</div></div>'+
+  '</div>'+
+  '<div class="sdiv">Formas de pagamento no PDF</div>'+
+  '<div style="display:flex;gap:0;flex-wrap:wrap">'+
+  chk('pix','Pix',PP,'pdfPagamentos')+chk('cartao','Cartao',PP,'pdfPagamentos')+chk('dinheiro','Dinheiro',PP,'pdfPagamentos')+chk('link','Link de pagamento',PP,'pdfPagamentos')+chk('qrcode','QR Code Pix',PP,'pdfPagamentos')+
+  '</div>'+
+  '<div class="sdiv">Itens visiveis no orcamento PDF</div>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">'+
+  chk('material','Material e peso',PM,'pdfMostrar')+chk('tempo','Tempo de impressao',PM,'pdfMostrar')+
+  chk('labor','Mao de obra',PM,'pdfMostrar')+chk('extras','Extras / acabamento',PM,'pdfMostrar')+
+  chk('margem','Margem de lucro',PM,'pdfMostrar')+chk('imposto','Impostos',PM,'pdfMostrar')+
+  chk('desconto','Desconto',PM,'pdfMostrar')+chk('unitario','Preco unitario',PM,'pdfMostrar')+
+  '</div>'+
+  '<div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">'+
+  '<button class="btn pr" onclick="saveCfgP()">Salvar pagamentos e PDF</button></div></div></div>'+
+
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Configuracoes do Recibo</h3><p>Personalize textos, formas de pagamento e assinatura</p></div></div>'+
+  '<div class="cb">'+
+  '<div class="sdiv">Textos do recibo</div>'+
+  '<div class="g2">'+
+  '<div class="fg s2"><label>Texto introdutorio (use {cliente} e {emitente})</label>'+
+  '<input id="cfg-rint" value="'+(S.cfg.reciboTextoIntro||'').replace(/"/g,'&quot;')+'" placeholder="Declaro que recebi de {cliente} a quantia de:"></div>'+
+  '<div class="fg s2"><label>Texto de referencia (use {descricao}, {cliente})</label>'+
+  '<input id="cfg-rref" value="'+(S.cfg.reciboTextoRef||'').replace(/"/g,'&quot;')+'" placeholder="Referente a: {descricao}"></div>'+
+  '<div class="fg s2"><label>Texto do rodape do recibo (opcional)</label>'+
+  '<input id="cfg-rrod" value="'+(S.cfg.reciboRodape||'').replace(/"/g,'&quot;')+'" placeholder="Ex: Este recibo tem validade legal."></div>'+
+  '</div>'+
+  '<div class="sdiv">Formas de pagamento disponiveis</div>'+
+  '<div id="fps-list">'+
+  (S.cfg.formasPagamento||[]).map(function(f){
+    return '<div class="lr" style="flex-wrap:wrap;gap:6px">'+
       '<label class="chk-row" style="flex:0 0 auto"><input type="checkbox" '+(f.ativo?'checked':'')+' onchange="toggleFP(\''+f.id+'\',this.checked)"> <strong>'+f.nome+'</strong></label>'+
-      '<input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe (ex: chave pix, n conta...)" value="'+(f.detalhe||'')+'" oninput="updateFPDetalhe(\''+f.id+'\',this.value)">'+
-      '<button class="btn sm dg" onclick="delFP(\''+f.id+'\')">X</button></div>').join('')}</div>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-      <input id="nova-fp" style="flex:1;min-width:180px;padding:7px 11px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-family:inherit" placeholder="Nova forma (ex: Boleto bancario)">
-      <button class="btn pr" onclick="addFP()">+ Adicionar</button>
-    </div>
-    <div class="sdiv">Assinatura virtual</div>
-    <p style="font-size:12px;color:var(--mt);margin-bottom:10px">Faca sua assinatura em papel, fotografe ou escaneie, e faca upload aqui. Ela aparecera no recibo quando selecionada.</p>
-    <div class="fg">
-      <label>Upload da assinatura (PNG/JPG transparente - ideal)</label>
-      <input type="file" id="cfg-ass-img" accept="image/*" onchange="loadImg(this,'assinatura')" style="padding:5px;font-size:12px">
-      <div id="ass-preview">${imgPreview(S.cfg.assinaturaBase64,'assinatura','50px')}</div>
-    </div>
-    <label class="chk-row" style="margin-top:10px">
-      <input type="checkbox" ${S.cfg.usarAssinatura?'checked':''} onchange="S.cfg.usarAssinatura=this.checked;saveDrive()"> Usar assinatura por padrao em novos recibos
-    </label>
-    <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">
-      <button class="btn pr" onclick="saveCfgRec()">Salvar configuracoes do recibo</button>
-    </div>
-  </div></div>
+      '<input style="flex:1;min-width:150px;padding:5px 9px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:12px;font-family:inherit" placeholder="Detalhe..." value="'+(f.detalhe||'')+'" oninput="updateFPDetalhe(\''+f.id+'\',this.value)">'+
+      '<button class="btn sm dg" onclick="delFP(\''+f.id+'\')">X</button></div>';
+  }).join('')+
+  '</div>'+
+  '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+
+  '<input id="nova-fp" style="flex:1;min-width:180px;padding:7px 11px;border:1px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-family:inherit" placeholder="Nova forma (ex: Boleto bancario)">'+
+  '<button class="btn pr" onclick="addFP()">+ Adicionar</button></div>'+
+  '<div class="sdiv">Assinatura virtual</div>'+
+  '<div class="fg">'+
+  '<label>Upload da assinatura (PNG/JPG transparente)</label>'+
+  '<input type="file" id="cfg-ass-img" accept="image/*" onchange="loadImg(this,\'assinatura\')" style="padding:5px;font-size:12px">'+
+  '<div id="ass-preview">'+imgPreview(S.cfg.assinaturaBase64,'assinatura','50px')+'</div></div>'+
+  '<label class="chk-row" style="margin-top:10px">'+
+  '<input type="checkbox" '+(S.cfg.usarAssinatura?'checked':'')+' onchange="S.cfg.usarAssinatura=this.checked;saveDrive()"> Usar assinatura por padrao em novos recibos</label>'+
+  '<div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--bdr)">'+
+  '<button class="btn pr" onclick="saveCfgRec()">Salvar configuracoes do recibo</button></div></div></div>'+
 
-  <div class="cs"><div class="ch"><div class="ch-t"><h3>Google Drive</h3><p>Sincronizacao automatica</p></div></div>
-  <div class="cb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <div class="dr-dot ${S.driveOk?'ok':''}" style="width:10px;height:10px;flex-shrink:0"></div>
-    <div style="flex:1"><div style="font-size:13px;font-weight:500">${S.driveOk?'Conectado ao Google Drive':'Nao conectado'}</div>
-    <div style="font-size:12px;color:var(--mt)">${S.driveOk?'Arquivo: print3d_v4.json':'Dados apenas locais'}</div></div>
-    <button class="btn ${S.driveOk?'':'pr'}" onclick="connectDrive()">${S.driveOk?'Reconectar':'Conectar Drive'}</button>
-    ${S.driveOk?`<button class="btn" onclick="saveDrive().then(()=>toast('OK Sincronizado!'))"> Sync</button>`:''}
-  </div></div>
-  </div>`;
+  '<div class="cs"><div class="ch"><div class="ch-t"><h3>Google Drive</h3><p>Sincronizacao automatica</p></div></div>'+
+  '<div class="cb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+  '<div class="dr-dot '+(S.driveOk?'ok':'')+'" style="width:10px;height:10px;flex-shrink:0"></div>'+
+  '<div style="flex:1"><div style="font-size:13px;font-weight:500">'+(S.driveOk?'Conectado ao Google Drive':'Nao conectado')+'</div>'+
+  '<div style="font-size:12px;color:var(--mt)">'+(S.driveOk?'Arquivo: print3d_v4.json':'Dados apenas locais')+'</div></div>'+
+  '<button class="btn '+(S.driveOk?'':'pr')+'" onclick="connectDrive()">'+(S.driveOk?'Reconectar':'Conectar Drive')+'</button>'+
+  driveSync+
+  '</div></div>'+
+  '</div>';
 }
 
 function saveCfgG(){
